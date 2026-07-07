@@ -111,6 +111,11 @@ function setupEventListeners() {
         searchInput.focus();
     });
 
+    searchBox.addEventListener('click', () => {
+        searchBox.classList.add('expanded');
+        searchInput.focus();
+    });
+
     // Close search box if clicked outside and empty
     document.addEventListener('click', (e) => {
         if (!searchBox.contains(e.target) && searchInput.value.trim() === '') {

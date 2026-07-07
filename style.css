@@ -173,12 +173,16 @@ body {
     font-size: 13px;
     margin-left: 8px;
     width: 0;
+    flex: 0 1 0;
+    min-width: 0;
     opacity: 0;
     transition: var(--transition-smooth);
     pointer-events: none;
 }
 
 .search-box.expanded .search-input {
+    width: 100%;
+    flex: 1 1 auto;
     opacity: 1;
     pointer-events: auto;
 }
@@ -194,6 +198,8 @@ body {
     cursor: pointer;
     font-size: 14px;
     display: none;
+    margin-left: 8px;
+    flex-shrink: 0;
 }
 
 .avatar {
