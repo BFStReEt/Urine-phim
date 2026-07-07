@@ -1241,22 +1241,23 @@ function showFsControls() {
 
     if (fsPlayer.style.display !== 'flex') return;
 
-    // Always keep controls bar visible — only back button autohides with cursor
+    // Show controls & reset cursor on mouse move
     backBtn.classList.remove('hidden');
-    fsPlayerControls.classList.remove('hidden'); // always show
+    fsPlayerControls.classList.remove('hidden');
     fsPlayer.style.cursor = 'default';
 
-    // Only autohide back button & cursor (not the controls bar)
+    // Autohide both back button AND controls bar together (synced with native player controls)
     clearTimeout(fsControlsTimeout);
     fsControlsTimeout = setTimeout(() => {
         if (fsPlayer.style.display === 'flex') {
             backBtn.classList.add('hidden');
-            fsSettingsMenu.classList.remove('open'); // close settings menu if open
-            fsPlayer.style.cursor = 'none'; // hide cursor on idle
-            // fsPlayerControls stays visible always
+            fsPlayerControls.classList.add('hidden');   // hide together with native controls
+            fsSettingsMenu.classList.remove('open');     // close settings menu if open
+            fsPlayer.style.cursor = 'none';              // hide cursor on idle
         }
     }, 3000);
 }
+
 
 
 // Stop Video playback and free memory
