@@ -412,94 +412,98 @@ async function loadHomeData() {
     // Reset displayed slugs to prevent duplications across rows
     displayedSlugs.clear();
 
+    const YEAR = 2026;
+
     // Inject skeletons for all rows
     const rows = ['new', 'single', 'action', 'series', 'horror', 'anime', 'scifi', 'historical', 'comedy', 'romance', 'adventure', 'crime'];
     rows.forEach(row => injectSkeletons(`track-${row}`, 8));
 
     // 1. Newly updated
-    const resNew = await fetchApi(`${API_BASE}/danh-sach/phim-moi-cap-nhat?page=1`);
-    if (resNew && resNew.items && resNew.items.length > 0) {
-        renderHeroBanner(resNew.items[0]);
-        renderTrack(resNew.items, 'track-new', getImageUrl, resNew.pathImage);
+    const resNew = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-moi-cap-nhat?page=1&year=${YEAR}`);
+    if (resNew && resNew.data && resNew.data.items && resNew.data.items.length > 0) {
+        const cdn = resNew.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
+        renderHeroBanner(resNew.data.items[0]);
+        renderTrack(resNew.data.items, 'track-new', getImageUrl, cdn);
     }
 
     // 2. Single Movies
-    const resSingle = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-le?page=1`);
+    const resSingle = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-le?page=1&year=${YEAR}`);
     if (resSingle && resSingle.data) {
         const cdn = resSingle.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resSingle.data.items, 'track-single', getImageUrl, cdn);
     }
 
     // 3. Action Movies (Genre)
-    const resAction = await fetchApi(`${API_BASE}/v1/api/the-loai/hanh-dong?page=1`);
+    const resAction = await fetchApi(`${API_BASE}/v1/api/the-loai/hanh-dong?page=1&year=${YEAR}`);
     if (resAction && resAction.data) {
         const cdn = resAction.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resAction.data.items, 'track-action', getImageUrl, cdn);
     }
 
     // 4. TV Series
-    const resSeries = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-bo?page=1`);
+    const resSeries = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-bo?page=1&year=${YEAR}`);
     if (resSeries && resSeries.data) {
         const cdn = resSeries.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resSeries.data.items, 'track-series', getImageUrl, cdn);
     }
 
     // 5. Horror Movies (Genre)
-    const resHorror = await fetchApi(`${API_BASE}/v1/api/the-loai/kinh-di?page=1`);
+    const resHorror = await fetchApi(`${API_BASE}/v1/api/the-loai/kinh-di?page=1&year=${YEAR}`);
     if (resHorror && resHorror.data) {
         const cdn = resHorror.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resHorror.data.items, 'track-horror', getImageUrl, cdn);
     }
 
     // 6. Anime
-    const resAnime = await fetchApi(`${API_BASE}/v1/api/danh-sach/hoat-hinh?page=1`);
+    const resAnime = await fetchApi(`${API_BASE}/v1/api/danh-sach/hoat-hinh?page=1&year=${YEAR}`);
     if (resAnime && resAnime.data) {
         const cdn = resAnime.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resAnime.data.items, 'track-anime', getImageUrl, cdn);
     }
 
     // 7. Sci-Fi Movies (Genre)
-    const resSciFi = await fetchApi(`${API_BASE}/v1/api/the-loai/vien-tuong?page=1`);
+    const resSciFi = await fetchApi(`${API_BASE}/v1/api/the-loai/vien-tuong?page=1&year=${YEAR}`);
     if (resSciFi && resSciFi.data) {
         const cdn = resSciFi.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resSciFi.data.items, 'track-scifi', getImageUrl, cdn);
     }
 
     // 8. Historical / Costume Movies (Genre)
-    const resHist = await fetchApi(`${API_BASE}/v1/api/the-loai/co-trang?page=1`);
+    const resHist = await fetchApi(`${API_BASE}/v1/api/the-loai/co-trang?page=1&year=${YEAR}`);
     if (resHist && resHist.data) {
         const cdn = resHist.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resHist.data.items, 'track-historical', getImageUrl, cdn);
     }
 
     // 9. Comedy Movies (Genre: hai-huoc)
-    const resComedy = await fetchApi(`${API_BASE}/v1/api/the-loai/hai-huoc?page=1`);
+    const resComedy = await fetchApi(`${API_BASE}/v1/api/the-loai/hai-huoc?page=1&year=${YEAR}`);
     if (resComedy && resComedy.data) {
         const cdn = resComedy.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resComedy.data.items, 'track-comedy', getImageUrl, cdn);
     }
 
     // 10. Romance Movies (Genre: tinh-cam)
-    const resRomance = await fetchApi(`${API_BASE}/v1/api/the-loai/tinh-cam?page=1`);
+    const resRomance = await fetchApi(`${API_BASE}/v1/api/the-loai/tinh-cam?page=1&year=${YEAR}`);
     if (resRomance && resRomance.data) {
         const cdn = resRomance.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resRomance.data.items, 'track-romance', getImageUrl, cdn);
     }
 
     // 11. Adventure Movies (Genre: phieu-luu)
-    const resAdventure = await fetchApi(`${API_BASE}/v1/api/the-loai/phieu-luu?page=1`);
+    const resAdventure = await fetchApi(`${API_BASE}/v1/api/the-loai/phieu-luu?page=1&year=${YEAR}`);
     if (resAdventure && resAdventure.data) {
         const cdn = resAdventure.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resAdventure.data.items, 'track-adventure', getImageUrl, cdn);
     }
 
     // 12. Crime Movies (Genre: hinh-su)
-    const resCrime = await fetchApi(`${API_BASE}/v1/api/the-loai/hinh-su?page=1`);
+    const resCrime = await fetchApi(`${API_BASE}/v1/api/the-loai/hinh-su?page=1&year=${YEAR}`);
     if (resCrime && resCrime.data) {
         const cdn = resCrime.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resCrime.data.items, 'track-crime', getImageUrl, cdn);
     }
 }
+
 
 // Render Featured Hero Banner
 async function renderHeroBanner(movie) {
