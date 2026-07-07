@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rần Phim - Xem Phim Miễn Phí</title>
+    <!-- Google Fonts: Oswald (supporting Vietnamese diacritics), Outfit & Inter for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for high-quality Netflix-like icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Hls.js for playing .m3u8 streams -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="navbar" id="mainHeader">
+        <div class="navbar-left">
+            <a href="#" class="logo" id="logoLink">RẦN PHIM</a>
+            <nav class="nav-links">
+                <a href="#" class="nav-link active" data-type="home">Trang chủ</a>
+                <a href="#" class="nav-link" data-type="phim-le">Phim Lẻ</a>
+                <a href="#" class="nav-link" data-type="phim-bo">Phim Bộ</a>
+                <a href="#" class="nav-link" data-type="hoat-hinh">Hoạt Hình</a>
+                <a href="#" class="nav-link" data-type="tv-shows">TV Shows</a>
+            </nav>
+        </div>
+        <div class="navbar-right">
+            <div class="search-box" id="searchBox">
+                <button class="search-btn" id="searchBtn" aria-label="Tìm kiếm">
+                    <i class="fas fa-search"></i>
+                </button>
+                <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm phim, thể loại..." autocomplete="off">
+                <button class="search-clear" id="searchClear" aria-label="Xóa tìm kiếm">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="user-profile">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" alt="Profile" class="avatar">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="content-container">
+        <!-- Search Results Grid (Visible only during search) -->
+        <section class="search-results-section" id="searchResultsSection" style="display: none;">
+            <h2 class="section-title" id="searchTitle">Kết quả tìm kiếm cho ""</h2>
+            <div class="movies-grid" id="searchResultsGrid">
+                <!-- Search cards injected dynamically -->
+            </div>
+        </section>
+
+        <!-- Home Content (Hero + Rows) -->
+        <div id="homeContent">
+            <!-- Hero Banner -->
+            <section class="hero" id="heroBanner">
+                <div class="hero-bg-container">
+                    <div class="hero-bg-overlay"></div>
+                    <img src="" alt="Hero Background" class="hero-bg" id="heroBg">
+                </div>
+                <div class="hero-content">
+                    <div class="hero-badges">
+                        <span class="badge badge-red" id="heroBadgeType">NỔI BẬT</span>
+                        <span class="badge" id="heroBadgeYear">2026</span>
+                        <span class="badge" id="heroBadgeQuality">HD</span>
+                        <span class="badge" id="heroBadgeLang">Vietsub</span>
+                    </div>
+                    <h1 class="hero-title" id="heroTitle">Đang tải...</h1>
+                    <h2 class="hero-subtitle" id="heroSubTitle">...</h2>
+                    <p class="hero-overview" id="heroOverview">
+                        Vui lòng đợi trong giây lát, dữ liệu phim đang được tải từ hệ thống máy chủ...
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" id="heroPlayBtn">
+                            <i class="fas fa-play"></i> Phát
+                        </button>
+                        <button class="btn btn-secondary" id="heroInfoBtn">
+                            <i class="fas fa-info-circle"></i> Thông tin khác
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Movie Categories Slider Rows -->
+            <section class="movies-rows-container">
+                <!-- Row 1: Phim mới cập nhật -->
+                <div class="movie-row" id="row-new">
+                    <h2 class="row-title">Phim mới cập nhật</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-new" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-new">
+                            <!-- Movie card skeletons injected initially -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-new" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Row 2: Phim lẻ -->
+                <div class="movie-row" id="row-single">
+                    <h2 class="row-title">Phim lẻ chọn lọc</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-single" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-single">
+                            <!-- Movie card skeletons -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-single" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Row 3: Phim hành động -->
+                <div class="movie-row" id="row-action">
+                    <h2 class="row-title">Phim hành động kịch tính</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-action" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-action">
+                            <!-- Movie card skeletons -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-action" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Row 4: Phim bộ -->
+                <div class="movie-row" id="row-series">
+                    <h2 class="row-title">Phim bộ thịnh hành</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-series" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-series">
+                            <!-- Movie card skeletons -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-series" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Row 5: Phim kinh dị -->
+                <div class="movie-row" id="row-horror">
+                    <h2 class="row-title">Phim kinh dị rùng rợn</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-horror" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-horror">
+                            <!-- Movie card skeletons -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-horror" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Row 6: Hoạt hình -->
+                <div class="movie-row" id="row-anime">
+                    <h2 class="row-title">Hoạt hình & Anime nổi bật</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-anime" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-anime">
+                            <!-- Movie card skeletons -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-anime" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Row 7: Phim viễn tưởng -->
+                <div class="movie-row" id="row-scifi">
+                    <h2 class="row-title">Phim viễn tưởng & Tương lai</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-scifi" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-scifi">
+                            <!-- Movie card skeletons -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-scifi" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Row 8: Phim cổ trang -->
+                <div class="movie-row" id="row-historical">
+                    <h2 class="row-title">Phim cổ trang Trung Quốc & Dã sử</h2>
+                    <div class="row-slider-container">
+                        <button class="slider-arrow arrow-left" id="prev-historical" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <div class="movie-track" id="track-historical">
+                            <!-- Movie card skeletons -->
+                        </div>
+                        <button class="slider-arrow arrow-right" id="next-historical" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Categorized Section (Visible when Phim Le, Phim Bo, Hoat Hinh, TV Shows active) -->
+        <section class="category-section" id="categorySection" style="display: none;">
+            <div class="category-header">
+                <h2 class="section-title" id="categoryTitle">Danh sách phim</h2>
+                <div class="category-filters">
+                    <!-- Filters can be added here if needed -->
+                </div>
+            </div>
+            <div class="movies-grid" id="categoryGrid">
+                <!-- Movie cards injected dynamically -->
+            </div>
+            <div class="pagination-container">
+                <button class="btn btn-secondary btn-sm" id="prevPageBtn"><i class="fas fa-chevron-left"></i> Trang trước</button>
+                <span class="page-number" id="pageNumber">Trang 1 / 1</span>
+                <button class="btn btn-secondary btn-sm" id="nextPageBtn">Trang sau <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalCloseBtn" aria-label="Đóng"><i class="fas fa-times"></i></button>
+            
+            <!-- Modal Header Banner -->
+            <div class="modal-banner">
+                <div class="modal-banner-overlay"></div>
+                <img src="" alt="Movie Banner" class="modal-banner-img" id="modalBannerImg">
+                <div class="modal-trailer-container" id="modalTrailerContainer" style="display: none;">
+                    <iframe src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen id="modalTrailerIframe"></iframe>
+                </div>
+                <div class="modal-banner-details">
+                    <h2 class="modal-movie-title" id="modalMovieTitle">Tên phim</h2>
+                    <h3 class="modal-movie-subtitle" id="modalMovieSubTitle">Tên gốc</h3>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" id="modalPlayBtn"><i class="fas fa-play"></i> Phát</button>
+                        <button class="btn btn-secondary" id="modalTrailerBtn" style="display: none;"><i class="fab fa-youtube"></i> Xem Trailer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Info Block -->
+            <div class="modal-body">
+                <div class="modal-info-grid">
+                    <div class="modal-info-left">
+                        <div class="modal-meta">
+                            <span class="meta-item match-score" id="modalMatchScore">98% Trùng khớp</span>
+                            <span class="meta-item" id="modalYear">2026</span>
+                            <span class="meta-item badge-quality" id="modalQuality">HD</span>
+                            <span class="meta-item badge-lang" id="modalLang">Vietsub</span>
+                            <span class="meta-item" id="modalTime">120 phút</span>
+                        </div>
+                        <p class="modal-overview" id="modalOverview">Mô tả phim...</p>
+                    </div>
+                    <div class="modal-info-right">
+                        <div class="info-item">
+                            <span class="info-label">Đạo diễn:</span>
+                            <span class="info-value" id="modalDirector">Đang cập nhật</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Diễn viên:</span>
+                            <span class="info-value" id="modalActors">Đang cập nhật</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Thể loại:</span>
+                            <span class="info-value" id="modalCategories">Đang cập nhật</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Quốc gia:</span>
+                            <span class="info-value" id="modalCountries">Đang cập nhật</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Episodes Area -->
+                <div class="episodes-section" id="episodesSection" style="display: none;">
+                    <hr class="modal-divider">
+                    <div class="episodes-header">
+                        <h3>Danh sách tập</h3>
+                        <div class="server-tabs" id="serverTabs">
+                            <!-- Server tabs like Server #1, Server #2 -->
+                        </div>
+                    </div>
+                    <div class="episodes-grid" id="episodesGrid">
+                        <!-- Episode buttons injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Video Player (Theater Mode like Netflix) -->
+    <div class="fullscreen-player" id="fullscreenPlayer" style="display: none;">
+        <!-- Top bar controls (autohide on idle) -->
+        <button class="player-back-btn" id="playerBackBtn" aria-label="Quay lại">
+            <i class="fas fa-arrow-left"></i>
+            <span id="playerMovieTitle">Tên Phim - Tập 1</span>
+        </button>
+
+        <!-- Video Play Area -->
+        <div class="fs-video-container default">
+            <!-- Embed Iframe Player -->
+            <iframe src="" frameborder="0" class="fs-iframe-player" id="fsEmbedPlayer" allowfullscreen style="display: block;"></iframe>
+            
+            <!-- HLS Native / JS Player -->
+            <div class="fs-hls-wrapper" id="fsHlsWrapper" style="display: none;">
+                <video id="fsHlsVideoPlayer" autoplay></video>
+                <div class="player-error" id="fsPlayerError" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Không thể phát HLS do chính sách bảo mật CORS từ nhà mạng/máy chủ nguồn. Hãy đổi sang "Server VIP (Nhúng)" trong phần Cài đặt góc dưới bên phải.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom right control panel bar (autohide on idle) -->
+        <div class="fs-player-controls" id="fsPlayerControls">
+            <!-- Settings cog dropdown menu container (using server pill layout) -->
+            <div class="fs-settings-container" id="fsSettingsContainer">
+                <button class="control-btn settings-pill" id="fsGearBtn" aria-label="Cài đặt">
+                    <i class="fas fa-server"></i> Chọn Server
+                </button>
+                <div class="fs-settings-menu" id="fsSettingsMenu">
+                    <!-- Main Settings Menu -->
+                    <div class="settings-menu-panel" id="fsMainMenu">
+                        <button class="settings-menu-item" id="btnMenuServer">
+                            <span class="item-icon"><i class="fas fa-server"></i></span>
+                            <span class="item-text">Nguồn phát</span>
+                            <span class="item-value" id="valServer">Server VIP</span>
+                            <span class="item-arrow"><i class="fas fa-chevron-right"></i></span>
+                        </button>
+                        <button class="settings-menu-item" id="btnMenuSpeed">
+                            <span class="item-icon"><i class="fas fa-play-circle"></i></span>
+                            <span class="item-text">Tốc độ phát</span>
+                            <span class="item-value" id="valSpeed">Bình thường</span>
+                            <span class="item-arrow"><i class="fas fa-chevron-right"></i></span>
+                        </button>
+                        <button class="settings-menu-item" id="btnMenuRatio">
+                            <span class="item-icon"><i class="fas fa-expand"></i></span>
+                            <span class="item-text">Tỉ lệ khung hình</span>
+                            <span class="item-value" id="valRatio">Mặc định</span>
+                            <span class="item-arrow"><i class="fas fa-chevron-right"></i></span>
+                        </button>
+                    </div>
+                    
+                    <!-- Submenu: Server -->
+                    <div class="settings-menu-panel" id="fsSubServer" style="display: none;">
+                        <button class="submenu-back" id="backServer"><i class="fas fa-chevron-left"></i> Quay lại</button>
+                        <div class="settings-menu-header">Nguồn phát</div>
+                        <button class="settings-menu-item active" data-mode="embed" id="fsOptEmbed">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> Server VIP (Nhúng)
+                        </button>
+                        <button class="settings-menu-item" data-mode="hls" id="fsOptHls">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> Server Sạch (HLS)
+                        </button>
+                    </div>
+
+                    <!-- Submenu: Speed -->
+                    <div class="settings-menu-panel" id="fsSubSpeed" style="display: none;">
+                        <button class="submenu-back" id="backSpeed"><i class="fas fa-chevron-left"></i> Quay lại</button>
+                        <div class="settings-menu-header">Tốc độ phát</div>
+                        <button class="settings-menu-item" data-speed="0.5">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> 0.5x
+                        </button>
+                        <button class="settings-menu-item" data-speed="0.75">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> 0.75x
+                        </button>
+                        <button class="settings-menu-item active" data-speed="1">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> Bình thường
+                        </button>
+                        <button class="settings-menu-item" data-speed="1.25">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> 1.25x
+                        </button>
+                        <button class="settings-menu-item" data-speed="1.5">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> 1.5x
+                        </button>
+                        <button class="settings-menu-item" data-speed="2">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> 2x
+                        </button>
+                    </div>
+
+                    <!-- Submenu: Ratio -->
+                    <div class="settings-menu-panel" id="fsSubRatio" style="display: none;">
+                        <button class="submenu-back" id="backRatio"><i class="fas fa-chevron-left"></i> Quay lại</button>
+                        <div class="settings-menu-header">Tỉ lệ khung hình</div>
+                        <button class="settings-menu-item active" data-ratio="default">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> Mặc định
+                        </button>
+                        <button class="settings-menu-item" data-ratio="16-9">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> 16:9
+                        </button>
+                        <button class="settings-menu-item" data-ratio="4-3">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> 4:3
+                        </button>
+                        <button class="settings-menu-item" data-ratio="stretch">
+                            <span class="check-icon"><i class="fas fa-check"></i></span> Tràn màn hình
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Picture-in-Picture Button (HLS only) -->
+            <button class="control-btn" id="fsPipBtn" aria-label="Hình trong hình" style="display: none;">
+                <i class="fas fa-images"></i>
+            </button>
+
+            <!-- Native Fullscreen Toggle Button -->
+            <button class="control-btn" id="fsFullscreenBtn" aria-label="Toàn màn hình">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#">Âm thanh và Phụ đề</a>
+            <a href="#">Mô tả âm thanh</a>
+            <a href="#">Trung tâm trợ giúp</a>
+            <a href="#">Thẻ quà tặng</a>
+            <a href="#">Trung tâm truyền thông</a>
+            <a href="#">Quan hệ với nhà đầu tư</a>
+            <a href="#">Việc làm</a>
+            <a href="#">Điều khoản sử dụng</a>
+            <a href="#">Quyền riêng tư</a>
+            <a href="#">Thông báo pháp lý</a>
+            <a href="#">Tùy chọn cookie</a>
+            <a href="#">Thông tin doanh nghiệp</a>
+            <a href="#">Liên hệ với chúng tôi</a>
+        </div>
+        <p class="footer-copyright">© 2026 Rần Phim - Pairing with Antigravity AI. Nguồn dữ liệu từ API Ophim. Project chỉ phục vụ mục đích học tập.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
