@@ -1037,10 +1037,12 @@ function updateEpisodeNavUI() {
         panelGrid.appendChild(btn);
     });
 
-    // Scroll active episode into view inside panel
+    // Scroll active episode into view — only when panel is open to avoid browser revealing it
     setTimeout(() => {
+        const panel = document.getElementById('fsEpPanel');
+        if (!panel.classList.contains('open')) return;
         const activePanelBtn = panelGrid.querySelector('.fs-ep-panel-btn.active');
-        if (activePanelBtn) activePanelBtn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        if (activePanelBtn) activePanelBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }, 50);
 
     // Update next-ep overlay title if there is a next episode
@@ -1054,6 +1056,11 @@ function updateEpisodeNavUI() {
 
 function openEpPanel() {
     document.getElementById('fsEpPanel').classList.add('open');
+    // Scroll active episode into view after open animation
+    setTimeout(() => {
+        const active = document.querySelector('#fsEpPanelGrid .fs-ep-panel-btn.active');
+        if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 350);
 }
 
 function closeEpPanel() {
