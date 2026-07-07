@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApp() {
     setupEventListeners();
     setupSliders();
+    initEpisodeNavListeners();
     loadHomeData();
 }
 
@@ -991,9 +992,131 @@ function playEpisode(serverIndex, episodeIndex) {
     // Reset controls auto-hide timer
     showFsControls();
 
+    // Update episode navigation UI
+    updateEpisodeNavUI();
+
     // Load Stream Source in fullscreen player
     loadVideoSource(ep.link_embed, ep.link_m3u8);
 }
+
+// Update prev/next buttons, episode panel, and next-ep overlay based on current episode
+function updateEpisodeNavUI() {
+    if (!currentMovie || !currentMovie.episodes) return;
+    const server = currentMovie.episodes[currentServerIndex];
+    if (!server || !server.server_data) return;
+    const totalEps = server.server_data.length;
+
+    // Prev / Next nav buttons
+    const prevBtn = document.getElementById('fsPrevEpBtn');
+    const nextBtn = document.getElementById('fsNextEpBtn');
+    const epNav = document.getElementById('fsEpNav');
+
+    if (totalEps > 1) {
+        epNav.style.display = 'flex';
+        prevBtn.disabled = currentEpisodeIndex <= 0;
+        nextBtn.disabled = currentEpisodeIndex >= totalEps - 1;
+    } else {
+        epNav.style.display = 'none';
+    }
+
+    // Episode panel toggle button
+    const toggleBtn = document.getElementById('fsEpPanelToggle');
+    if (totalEps > 1) {
+        toggleBtn.style.display = 'flex';
+    } else {
+        toggleBtn.style.display = 'none';
+    }
+
+    // Episode panel grid
+    const panelGrid = document.getElementById('fsEpPanelGrid');
+    panelGrid.innerHTML = '';
+    server.server_data.forEach((ep, idx) => {
+        const epLabel = ep.name || `Tập ${idx + 1}`;
+        const btn = document.createElement('button');
+        btn.className = 'fs-ep-panel-btn' + (idx === currentEpisodeIndex ? ' active' : '');
+        btn.textContent = epLabel;
+        btn.addEventListener('click', () => {
+            closeEpPanel();
+            playEpisode(currentServerIndex, idx);
+        });
+        panelGrid.appendChild(btn);
+    });
+
+    // Scroll active episode into view inside panel
+    setTimeout(() => {
+        const activePanelBtn = panelGrid.querySelector('.fs-ep-panel-btn.active');
+        if (activePanelBtn) activePanelBtn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }, 50);
+
+    // Update next-ep overlay title if there is a next episode
+    const nextEpOverlay = document.getElementById('nextEpOverlay');
+    nextEpOverlay.style.display = 'none'; // hide when switching episodes
+    if (currentEpisodeIndex < totalEps - 1) {
+        const nextEp = server.server_data[currentEpisodeIndex + 1];
+        document.getElementById('nextEpTitle').textContent = nextEp.name || `Tập ${currentEpisodeIndex + 2}`;
+    }
+}
+
+function openEpPanel() {
+    document.getElementById('fsEpPanel').classList.add('open');
+}
+
+function closeEpPanel() {
+    document.getElementById('fsEpPanel').classList.remove('open');
+}
+
+// Wire up episode navigation event listeners (called once on DOM ready)
+function initEpisodeNavListeners() {
+    // Prev episode
+    document.getElementById('fsPrevEpBtn').addEventListener('click', () => {
+        if (currentEpisodeIndex > 0) playEpisode(currentServerIndex, currentEpisodeIndex - 1);
+    });
+
+    // Next episode
+    document.getElementById('fsNextEpBtn').addEventListener('click', () => {
+        const server = currentMovie && currentMovie.episodes[currentServerIndex];
+        if (server && currentEpisodeIndex < server.server_data.length - 1) {
+            playEpisode(currentServerIndex, currentEpisodeIndex + 1);
+        }
+    });
+
+    // Next episode from overlay button
+    document.getElementById('nextEpOverlayBtn').addEventListener('click', () => {
+        const server = currentMovie && currentMovie.episodes[currentServerIndex];
+        if (server && currentEpisodeIndex < server.server_data.length - 1) {
+            document.getElementById('nextEpOverlay').style.display = 'none';
+            playEpisode(currentServerIndex, currentEpisodeIndex + 1);
+        }
+    });
+
+    // Episode panel toggle (bottom-left)
+    document.getElementById('fsEpPanelToggle').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const panel = document.getElementById('fsEpPanel');
+        panel.classList.contains('open') ? closeEpPanel() : openEpPanel();
+    });
+
+    // Episode panel close X
+    document.getElementById('fsEpPanelClose').addEventListener('click', closeEpPanel);
+
+    // HLS video timeupdate → show next-ep overlay in last 30s
+    document.getElementById('fsHlsVideoPlayer').addEventListener('timeupdate', () => {
+        const video = document.getElementById('fsHlsVideoPlayer');
+        if (!video.duration || video.duration === Infinity) return;
+        const server = currentMovie && currentMovie.episodes[currentServerIndex];
+        if (!server) return;
+        const hasNext = currentEpisodeIndex < server.server_data.length - 1;
+        const overlay = document.getElementById('nextEpOverlay');
+        const remaining = video.duration - video.currentTime;
+        if (hasNext && remaining <= 30 && remaining > 0) {
+            overlay.style.display = 'flex';
+        } else {
+            overlay.style.display = 'none';
+        }
+    });
+}
+
+
 
 // Load Video Stream Sources based on current mode
 function loadVideoSource(embedUrl, m3u8Url) {
