@@ -855,7 +855,19 @@ function playEpisode(serverIndex, episodeIndex) {
 
     // Open Fullscreen Theater Player
     const fsPlayer = document.getElementById('fullscreenPlayer');
-    document.getElementById('playerMovieTitle').textContent = `${currentMovie.name} - ${ep.filename || `Tập ${ep.name}`}`;
+    // Robust parsing for episode title to prevent API bugs (e.g. empty or trailing "Tập ")
+    let epTitle = '';
+    const trimmedFilename = (ep.filename || '').trim();
+    if (trimmedFilename && trimmedFilename.toLowerCase() !== 'tập') {
+        epTitle = trimmedFilename;
+    } else if (ep.name) {
+        const nameStr = String(ep.name).trim();
+        epTitle = nameStr.toLowerCase().startsWith('tập') ? nameStr : `Tập ${nameStr}`;
+    } else {
+        epTitle = 'Tập Full';
+    }
+
+    document.getElementById('playerMovieTitle').textContent = `${currentMovie.name} - ${epTitle}`;
     fsPlayer.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Ensure body scroll lock
 
