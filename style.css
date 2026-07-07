@@ -75,20 +75,21 @@ body {
 }
 
 .navbar .logo {
-    color: var(--netflix-red);
-    font-family: 'Oswald', sans-serif;
-    font-size: 32px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
     text-decoration: none;
-    text-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
     transition: var(--transition-smooth);
 }
 
 .navbar .logo:hover {
-    transform: scale(1.05);
-    text-shadow: 0 0 15px rgba(229, 9, 20, 0.8);
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.6));
+}
+
+.navbar .logo-img {
+    height: 42px;
+    object-fit: contain;
+    display: block;
 }
 
 .nav-links {
