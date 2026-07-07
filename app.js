@@ -75,7 +75,20 @@ function setupEventListeners() {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const type = link.getAttribute('data-type');
-            switchTab(type, link);
+            if (type) {
+                switchTab(type, link);
+            }
+        });
+    });
+
+    // Dropdown items (Genres Selection)
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const slug = item.getAttribute('data-slug');
+            const name = item.getAttribute('data-name');
+            selectGenre(slug, name, item);
         });
     });
 
@@ -260,6 +273,9 @@ function switchTab(type, clickedLink) {
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     clickedLink.classList.add('active');
 
+    // Remove active class from all dropdown items
+    document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+
     // Reset Search input UI if switching tabs
     if (type !== 'search') {
         const searchBox = document.getElementById('searchBox');
@@ -295,6 +311,38 @@ function switchTab(type, clickedLink) {
         document.getElementById('categoryTitle').textContent = title;
         loadCategoryPage(type, 1);
     }
+}
+
+// Select Genre from Dropdown Menu
+function selectGenre(slug, name, item) {
+    // 1. Remove active class from all main nav links and add to the main Thể loại link
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.getElementById('genreLink').classList.add('active');
+
+    // 2. Remove active class from all dropdown items and add to the clicked item
+    document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+
+    // 3. Clear Search input and status
+    const searchBox = document.getElementById('searchBox');
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = '';
+    searchBox.classList.remove('expanded', 'has-text');
+
+    // 4. Toggle Content Sections
+    const homeContent = document.getElementById('homeContent');
+    const categorySection = document.getElementById('categorySection');
+    const searchSection = document.getElementById('searchResultsSection');
+
+    homeContent.style.display = 'none';
+    searchSection.style.display = 'none';
+    categorySection.style.display = 'block';
+
+    // 5. Load and Render movies in grid
+    document.getElementById('categoryTitle').textContent = name;
+    currentType = 'genre-' + slug;
+    currentPage = 1;
+    loadCategoryPage(currentType, 1);
 }
 
 // Inject Skeletons for Loading State
@@ -534,7 +582,15 @@ async function loadCategoryPage(type, page) {
     document.getElementById('prevPageBtn').disabled = true;
     document.getElementById('nextPageBtn').disabled = true;
 
-    const res = await fetchApi(`${API_BASE}/v1/api/danh-sach/${type}?page=${page}`);
+    let url = '';
+    if (type.startsWith('genre-')) {
+        const genreSlug = type.replace('genre-', '');
+        url = `${API_BASE}/v1/api/the-loai/${genreSlug}?page=${page}`;
+    } else {
+        url = `${API_BASE}/v1/api/danh-sach/${type}?page=${page}`;
+    }
+
+    const res = await fetchApi(url);
     if (res && res.status === 'success' && res.data) {
         const data = res.data;
         const cdn = data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
