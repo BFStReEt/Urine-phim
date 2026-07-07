@@ -1241,22 +1241,23 @@ function showFsControls() {
 
     if (fsPlayer.style.display !== 'flex') return;
 
-    // Show elements & reset cursor
+    // Always keep controls bar visible — only back button autohides with cursor
     backBtn.classList.remove('hidden');
-    fsPlayerControls.classList.remove('hidden');
+    fsPlayerControls.classList.remove('hidden'); // always show
     fsPlayer.style.cursor = 'default';
 
-    // Clear previous timer and set new one
+    // Only autohide back button & cursor (not the controls bar)
     clearTimeout(fsControlsTimeout);
     fsControlsTimeout = setTimeout(() => {
         if (fsPlayer.style.display === 'flex') {
             backBtn.classList.add('hidden');
-            fsPlayerControls.classList.add('hidden');
             fsSettingsMenu.classList.remove('open'); // close settings menu if open
             fsPlayer.style.cursor = 'none'; // hide cursor on idle
+            // fsPlayerControls stays visible always
         }
     }, 3000);
 }
+
 
 // Stop Video playback and free memory
 function stopVideoPlayer() {
