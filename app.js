@@ -152,24 +152,25 @@ function setupEventListeners() {
     modalTrailerBtn.addEventListener('click', () => {
         if (!currentMovie || !currentMovie.trailer_url) return;
 
-        const trailerContainer = document.getElementById('modalTrailerContainer');
+        const trailerSection = document.getElementById('modalTrailerSection');
         const trailerIframe = document.getElementById('modalTrailerIframe');
-        const bannerImg = document.getElementById('modalBannerImg');
         
         const embedUrl = getYoutubeEmbedUrl(currentMovie.trailer_url);
         if (!embedUrl) return;
 
-        if (trailerContainer.style.display === 'none') {
+        if (trailerSection.style.display === 'none') {
             // Play trailer
-            bannerImg.style.display = 'none';
-            trailerContainer.style.display = 'block';
+            trailerSection.style.display = 'block';
             trailerIframe.src = embedUrl;
             modalTrailerBtn.innerHTML = '<i class="fas fa-times-circle"></i> Đóng Trailer';
+            // Scroll smoothly to trailer section
+            setTimeout(() => {
+                trailerSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         } else {
             // Stop trailer
             trailerIframe.src = '';
-            trailerContainer.style.display = 'none';
-            bannerImg.style.display = 'block';
+            trailerSection.style.display = 'none';
             modalTrailerBtn.innerHTML = '<i class="fab fa-youtube"></i> Xem Trailer';
         }
     });
@@ -707,11 +708,10 @@ async function openMovieDetail(slug, autoPlay = false) {
     document.getElementById('episodesSection').style.display = 'none';
 
     // Reset Trailer state
-    document.getElementById('modalTrailerContainer').style.display = 'none';
+    document.getElementById('modalTrailerSection').style.display = 'none';
     document.getElementById('modalTrailerIframe').src = '';
     document.getElementById('modalTrailerBtn').style.display = 'none';
     document.getElementById('modalTrailerBtn').innerHTML = '<i class="fab fa-youtube"></i> Xem Trailer';
-    document.getElementById('modalBannerImg').style.display = 'block';
     
     // Close fullscreen player if active
     closeFullscreenPlayer();
@@ -1044,8 +1044,7 @@ function closeMovieDetail() {
     // Stop and clear the trailer if playing
     const trailerIframe = document.getElementById('modalTrailerIframe');
     if (trailerIframe) trailerIframe.src = '';
-    document.getElementById('modalTrailerContainer').style.display = 'none';
-    document.getElementById('modalBannerImg').style.display = 'block';
+    document.getElementById('modalTrailerSection').style.display = 'none';
     document.getElementById('modalTrailerBtn').innerHTML = '<i class="fab fa-youtube"></i> Xem Trailer';
     
     closeFullscreenPlayer();

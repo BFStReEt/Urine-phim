@@ -275,9 +275,6 @@
             <div class="modal-banner">
                 <div class="modal-banner-overlay"></div>
                 <img src="" alt="Movie Banner" class="modal-banner-img" id="modalBannerImg">
-                <div class="modal-trailer-container" id="modalTrailerContainer" style="display: none;">
-                    <iframe src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen id="modalTrailerIframe"></iframe>
-                </div>
                 <div class="modal-banner-details">
                     <h2 class="modal-movie-title" id="modalMovieTitle">Tên phim</h2>
                     <h3 class="modal-movie-subtitle" id="modalMovieSubTitle">Tên gốc</h3>
@@ -318,6 +315,17 @@
                             <span class="info-label">Quốc gia:</span>
                             <span class="info-value" id="modalCountries">Đang cập nhật</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Trailer Section (above episodes) -->
+                <div class="modal-trailer-section" id="modalTrailerSection" style="display: none;">
+                    <hr class="modal-divider">
+                    <div class="trailer-header">
+                        <h3>Trailer</h3>
+                    </div>
+                    <div class="trailer-wrapper">
+                        <iframe src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen id="modalTrailerIframe"></iframe>
                     </div>
                 </div>
 
