@@ -899,10 +899,25 @@ function loadVideoSource(embedUrl, m3u8Url) {
     const fsFullscreenBtn = document.getElementById('fsFullscreenBtn');
 
     // Cache URLs on elements to allow mode switching
-    fsEmbed.setAttribute('data-src', embedUrl);
-    fsHlsVideo.setAttribute('data-src', m3u8Url);
+    fsEmbed.setAttribute('data-src', embedUrl || '');
+    fsHlsVideo.setAttribute('data-src', m3u8Url || '');
 
     stopVideoPlayer();
+
+    // Reset default HLS error message
+    fsError.innerHTML = `<i class="fas fa-exclamation-triangle"></i><p>Không thể phát HLS do chính sách bảo mật CORS từ nhà mạng/máy chủ nguồn. Hãy đổi sang "Server VIP (Nhúng)" trong phần Cài đặt góc dưới bên phải.</p>`;
+    fsError.style.display = 'none';
+
+    // Check if both stream URLs are completely empty/missing from the API
+    if (!embedUrl && !m3u8Url) {
+        fsEmbed.style.display = 'none';
+        fsHlsWrapper.style.display = 'flex';
+        fsError.style.display = 'flex';
+        fsError.innerHTML = `<i class="fas fa-exclamation-triangle"></i><p>Rất tiếc, bộ phim này chưa có nguồn phát (Streaming Links). Vui lòng quay lại thử lại sau hoặc chọn phim khác.</p>`;
+        fsPipBtn.style.display = 'none';
+        fsFullscreenBtn.style.display = 'none';
+        return;
+    }
 
     if (currentPlayerMode === 'embed') {
         fsEmbed.style.display = 'block';
