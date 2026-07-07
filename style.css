@@ -179,6 +179,7 @@ body {
 }
 
 .search-box.expanded .search-input {
+    width: 100%;
     opacity: 1;
     pointer-events: auto;
 }
