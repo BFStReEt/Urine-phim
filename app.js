@@ -1024,8 +1024,13 @@ function closeFullscreenPlayer() {
     const fsPlayer = document.getElementById('fullscreenPlayer');
     fsPlayer.style.display = 'none';
     
-    // Unlock modal view scroll (modal is still active in background)
-    document.body.style.overflow = 'hidden'; 
+    // Unlock page scroll if modal is closed, otherwise keep locked for modal view
+    const modal = document.getElementById('detailModal');
+    if (modal && modal.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    } 
     fsPlayer.style.cursor = 'default';
 
     stopVideoPlayer();
