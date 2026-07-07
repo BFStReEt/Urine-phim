@@ -267,6 +267,16 @@ function setupEventListeners() {
 
 
 
+// Helper: Check if a movie has any valid streaming links (embed or m3u8)
+function hasStreamingLinks(movie) {
+    if (!movie.episodes || movie.episodes.length === 0) return false;
+    return movie.episodes.some(server => {
+        return server.server_data && server.server_data.length > 0 && server.server_data.some(ep => {
+            return (ep.link_embed && ep.link_embed.trim() !== '') || (ep.link_m3u8 && ep.link_m3u8.trim() !== '');
+        });
+    });
+}
+
 // Utility: Image URL Helper
 function getImageUrl(url, pathPrefix = IMAGE_DEFAULT_BASE) {
     if (!url) return 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png';
@@ -523,6 +533,8 @@ async function renderHeroBanner(movie) {
     lang.textContent = fullMovie.lang || 'Vietsub';
     type.textContent = fullMovie.type === 'single' ? 'Phim Lẻ' : 'Phim Bộ';
 
+    fullMovie.episodes = resDetail.episodes || [];
+
     // Bind action buttons
     const playBtn = document.getElementById('heroPlayBtn');
     const infoBtn = document.getElementById('heroInfoBtn');
@@ -533,9 +545,18 @@ async function renderHeroBanner(movie) {
     playBtn.parentNode.replaceChild(newPlayBtn, playBtn);
     infoBtn.parentNode.replaceChild(newInfoBtn, infoBtn);
 
-    newPlayBtn.addEventListener('click', () => {
-        openMovieDetail(fullMovie.slug, true);
-    });
+    const hasSource = hasStreamingLinks(fullMovie);
+    if (!hasSource) {
+        newPlayBtn.disabled = true;
+        newPlayBtn.innerHTML = `<i class="fas fa-exclamation-circle"></i> Chưa có nguồn`;
+    } else {
+        newPlayBtn.disabled = false;
+        newPlayBtn.innerHTML = `<i class="fas fa-play"></i> Phát`;
+        
+        newPlayBtn.addEventListener('click', () => {
+            openMovieDetail(fullMovie.slug, true);
+        });
+    }
 
     newInfoBtn.addEventListener('click', () => {
         openMovieDetail(fullMovie.slug, false);
@@ -819,14 +840,23 @@ async function openMovieDetail(slug, autoPlay = false) {
     // Episodes & Servers Section
     setupEpisodesAndServers(autoPlay);
 
-    // Bind "Xem Ngay" button to play first episode
+    // Bind "Phát" button to play first episode
     const playBtn = document.getElementById('modalPlayBtn');
     const newPlayBtn = playBtn.cloneNode(true);
     playBtn.parentNode.replaceChild(newPlayBtn, playBtn);
     
-    newPlayBtn.addEventListener('click', () => {
-        playEpisode(0, 0);
-    });
+    const hasSource = hasStreamingLinks(currentMovie);
+    if (!hasSource) {
+        newPlayBtn.disabled = true;
+        newPlayBtn.innerHTML = `<i class="fas fa-exclamation-circle"></i> Chưa có nguồn`;
+    } else {
+        newPlayBtn.disabled = false;
+        newPlayBtn.innerHTML = `<i class="fas fa-play"></i> Phát`;
+        
+        newPlayBtn.addEventListener('click', () => {
+            playEpisode(0, 0);
+        });
+    }
 }
 
 // Setup Episodes List & Server Navigation
@@ -837,6 +867,15 @@ function setupEpisodesAndServers(autoPlay) {
 
     if (!episodes || episodes.length === 0 || !episodes[0].server_data || episodes[0].server_data.length === 0) {
         epsSection.style.display = 'none';
+        return;
+    }
+
+    // If the movie has only 1 episode, hide the episodes section (clutter-free) but still support autoplay
+    if (episodes[0].server_data.length <= 1) {
+        epsSection.style.display = 'none';
+        if (autoPlay) {
+            playEpisode(0, 0);
+        }
         return;
     }
 
