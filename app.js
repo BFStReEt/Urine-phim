@@ -1026,9 +1026,15 @@ function loadVideoSource(embedUrl, m3u8Url) {
     }
 
     if (currentPlayerMode === 'embed') {
+        if (!embedUrl && m3u8Url) {
+            // Auto-fallback: switch to HLS mode if Embed link is missing but HLS is available
+            switchPlayerMode('hls');
+            return;
+        }
+        
         fsEmbed.style.display = 'block';
         fsHlsWrapper.style.display = 'none';
-        fsEmbed.src = embedUrl;
+        fsEmbed.src = embedUrl || '';
         fsPipBtn.style.display = 'none'; // PiP not supported on iframe
         fsFullscreenBtn.style.display = 'none'; // Fullscreen overlay button supported
     } else {
@@ -1038,7 +1044,12 @@ function loadVideoSource(embedUrl, m3u8Url) {
         fsFullscreenBtn.style.display = 'block'; // Fullscreen overlay button supported
         
         if (!m3u8Url) {
-            fsError.style.display = 'flex';
+            if (embedUrl) {
+                // Auto-fallback: switch to Embed mode if HLS link is missing but Embed is available
+                switchPlayerMode('embed');
+            } else {
+                fsError.style.display = 'flex';
+            }
             return;
         }
 
