@@ -354,79 +354,13 @@
                     <i class="fas fa-server"></i> Chọn Server
                 </button>
                 <div class="fs-settings-menu" id="fsSettingsMenu">
-                    <!-- Main Settings Menu -->
-                    <div class="settings-menu-panel" id="fsMainMenu">
-                        <button class="settings-menu-item" id="btnMenuServer">
-                            <span class="item-icon"><i class="fas fa-server"></i></span>
-                            <span class="item-text">Nguồn phát</span>
-                            <span class="item-value" id="valServer">Server VIP</span>
-                            <span class="item-arrow"><i class="fas fa-chevron-right"></i></span>
-                        </button>
-                        <button class="settings-menu-item" id="btnMenuSpeed">
-                            <span class="item-icon"><i class="fas fa-play-circle"></i></span>
-                            <span class="item-text">Tốc độ phát</span>
-                            <span class="item-value" id="valSpeed">Bình thường</span>
-                            <span class="item-arrow"><i class="fas fa-chevron-right"></i></span>
-                        </button>
-                        <button class="settings-menu-item" id="btnMenuRatio">
-                            <span class="item-icon"><i class="fas fa-expand"></i></span>
-                            <span class="item-text">Tỉ lệ khung hình</span>
-                            <span class="item-value" id="valRatio">Mặc định</span>
-                            <span class="item-arrow"><i class="fas fa-chevron-right"></i></span>
-                        </button>
-                    </div>
-                    
-                    <!-- Submenu: Server -->
-                    <div class="settings-menu-panel" id="fsSubServer" style="display: none;">
-                        <button class="submenu-back" id="backServer"><i class="fas fa-chevron-left"></i> Quay lại</button>
-                        <div class="settings-menu-header">Nguồn phát</div>
+                    <div class="settings-menu-panel" id="fsServerPanel">
+                        <div class="settings-menu-header">Chọn nguồn phát</div>
                         <button class="settings-menu-item active" data-mode="embed" id="fsOptEmbed">
                             <span class="check-icon"><i class="fas fa-check"></i></span> Server VIP (Nhúng)
                         </button>
                         <button class="settings-menu-item" data-mode="hls" id="fsOptHls">
                             <span class="check-icon"><i class="fas fa-check"></i></span> Server Sạch (HLS)
-                        </button>
-                    </div>
-
-                    <!-- Submenu: Speed -->
-                    <div class="settings-menu-panel" id="fsSubSpeed" style="display: none;">
-                        <button class="submenu-back" id="backSpeed"><i class="fas fa-chevron-left"></i> Quay lại</button>
-                        <div class="settings-menu-header">Tốc độ phát</div>
-                        <button class="settings-menu-item" data-speed="0.5">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> 0.5x
-                        </button>
-                        <button class="settings-menu-item" data-speed="0.75">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> 0.75x
-                        </button>
-                        <button class="settings-menu-item active" data-speed="1">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> Bình thường
-                        </button>
-                        <button class="settings-menu-item" data-speed="1.25">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> 1.25x
-                        </button>
-                        <button class="settings-menu-item" data-speed="1.5">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> 1.5x
-                        </button>
-                        <button class="settings-menu-item" data-speed="2">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> 2x
-                        </button>
-                    </div>
-
-                    <!-- Submenu: Ratio -->
-                    <div class="settings-menu-panel" id="fsSubRatio" style="display: none;">
-                        <button class="submenu-back" id="backRatio"><i class="fas fa-chevron-left"></i> Quay lại</button>
-                        <div class="settings-menu-header">Tỉ lệ khung hình</div>
-                        <button class="settings-menu-item active" data-ratio="default">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> Mặc định
-                        </button>
-                        <button class="settings-menu-item" data-ratio="16-9">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> 16:9
-                        </button>
-                        <button class="settings-menu-item" data-ratio="4-3">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> 4:3
-                        </button>
-                        <button class="settings-menu-item" data-ratio="stretch">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> Tràn màn hình
                         </button>
                     </div>
                 </div>

@@ -174,7 +174,6 @@ function setupEventListeners() {
     fsGearBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         fsSettingsMenu.classList.toggle('open');
-        resetSettingsPanels(); // always open to main menu panel
     });
 
     // Close dropdown menu if click happens outside
@@ -187,96 +186,14 @@ function setupEventListeners() {
         e.stopPropagation();
     });
 
-    // --- Nested Settings Panels Logic ---
-    const fsMainMenu = document.getElementById('fsMainMenu');
-    const fsSubServer = document.getElementById('fsSubServer');
-    const fsSubSpeed = document.getElementById('fsSubSpeed');
-    const fsSubRatio = document.getElementById('fsSubRatio');
-
-    // Menu Item Clicks (Go to submenus)
-    document.getElementById('btnMenuServer').addEventListener('click', () => {
-        fsMainMenu.style.display = 'none';
-        fsSubServer.style.display = 'flex';
-    });
-    document.getElementById('btnMenuSpeed').addEventListener('click', () => {
-        fsMainMenu.style.display = 'none';
-        fsSubSpeed.style.display = 'flex';
-    });
-    document.getElementById('btnMenuRatio').addEventListener('click', () => {
-        fsMainMenu.style.display = 'none';
-        fsSubRatio.style.display = 'flex';
-    });
-
-    // Back Buttons (Return to main menu)
-    document.getElementById('backServer').addEventListener('click', () => {
-        fsSubServer.style.display = 'none';
-        fsMainMenu.style.display = 'flex';
-    });
-    document.getElementById('backSpeed').addEventListener('click', () => {
-        fsSubSpeed.style.display = 'none';
-        fsMainMenu.style.display = 'flex';
-    });
-    document.getElementById('backRatio').addEventListener('click', () => {
-        fsSubRatio.style.display = 'none';
-        fsMainMenu.style.display = 'flex';
-    });
-
-    // Submenu Items Selection
-    // 1. Server Submenu Option selection
+    // Server Option Selection
     document.getElementById('fsOptEmbed').addEventListener('click', () => {
         switchPlayerMode('embed');
-        document.getElementById('valServer').textContent = 'Server VIP';
-        // Go back to main menu
-        fsSubServer.style.display = 'none';
-        fsMainMenu.style.display = 'flex';
+        fsSettingsMenu.classList.remove('open');
     });
     document.getElementById('fsOptHls').addEventListener('click', () => {
         switchPlayerMode('hls');
-        document.getElementById('valServer').textContent = 'Server Sạch';
-        // Go back to main menu
-        fsSubServer.style.display = 'none';
-        fsMainMenu.style.display = 'flex';
-    });
-
-    // 2. Play Speed Submenu selection
-    const speedItems = fsSubSpeed.querySelectorAll('.settings-menu-item');
-    speedItems.forEach(item => {
-        item.addEventListener('click', () => {
-            speedItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-
-            const speed = item.getAttribute('data-speed');
-            const hlsVideo = document.getElementById('fsHlsVideoPlayer');
-            if (hlsVideo) {
-                hlsVideo.playbackRate = parseFloat(speed);
-            }
-
-            const speedLabel = item.textContent.trim();
-            document.getElementById('valSpeed').textContent = speedLabel;
-
-            // Go back to main menu
-            fsSubSpeed.style.display = 'none';
-            fsMainMenu.style.display = 'flex';
-        });
-    });
-
-    // 3. Aspect Ratio Submenu selection
-    const ratioItems = fsSubRatio.querySelectorAll('.settings-menu-item');
-    ratioItems.forEach(item => {
-        item.addEventListener('click', () => {
-            ratioItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-
-            const ratio = item.getAttribute('data-ratio');
-            changeAspectRatio(ratio);
-
-            const ratioLabel = item.textContent.trim();
-            document.getElementById('valRatio').textContent = ratioLabel;
-
-            // Go back to main menu
-            fsSubRatio.style.display = 'none';
-            fsMainMenu.style.display = 'flex';
-        });
+        fsSettingsMenu.classList.remove('open');
     });
 
     // Fullscreen Toggle button
@@ -328,30 +245,7 @@ function setupEventListeners() {
     });
 }
 
-// Reset settings menu panel structure back to main
-function resetSettingsPanels() {
-    document.getElementById('fsMainMenu').style.display = 'flex';
-    document.getElementById('fsSubServer').style.display = 'none';
-    document.getElementById('fsSubSpeed').style.display = 'none';
-    document.getElementById('fsSubRatio').style.display = 'none';
-}
 
-// Aspect Ratio Helper
-function changeAspectRatio(ratio) {
-    const container = document.querySelector('.fs-video-container');
-    const video = document.getElementById('fsHlsVideoPlayer');
-
-    // Reset container classes
-    container.className = 'fs-video-container ratio-' + ratio;
-
-    if (video) {
-        if (ratio === 'stretch') {
-            video.style.objectFit = 'fill';
-        } else {
-            video.style.objectFit = 'contain';
-        }
-    }
-}
 
 // Utility: Image URL Helper
 function getImageUrl(url, pathPrefix = IMAGE_DEFAULT_BASE) {
