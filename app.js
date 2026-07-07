@@ -1019,13 +1019,8 @@ function updateEpisodeNavUI() {
         epNav.style.display = 'none';
     }
 
-    // Episode panel toggle button
-    const toggleBtn = document.getElementById('fsEpPanelToggle');
-    if (totalEps > 1) {
-        toggleBtn.style.display = 'flex';
-    } else {
-        toggleBtn.style.display = 'none';
-    }
+    // Close panel on episode switch (don't auto-open)
+    closeEpPanel();
 
     // Episode panel grid
     const panelGrid = document.getElementById('fsEpPanelGrid');
@@ -1089,8 +1084,8 @@ function initEpisodeNavListeners() {
         }
     });
 
-    // Episode panel toggle (bottom-left)
-    document.getElementById('fsEpPanelToggle').addEventListener('click', (e) => {
+    // Episode list button (center of nav bar)
+    document.getElementById('fsEpListBtn').addEventListener('click', (e) => {
         e.stopPropagation();
         const panel = document.getElementById('fsEpPanel');
         panel.classList.contains('open') ? closeEpPanel() : openEpPanel();

@@ -382,12 +382,15 @@
 
         <!-- Bottom right control panel bar (autohide on idle) -->
         <div class="fs-player-controls" id="fsPlayerControls">
-            <!-- Prev / Next episode nav buttons -->
-            <div class="fs-ep-nav" id="fsEpNav">
-                <button class="control-btn ep-nav-btn" id="fsPrevEpBtn" aria-label="Tập trước" title="Tập trước">
+            <!-- Episode nav: Episodes list button + Prev/Next arrows (left side of controls) -->
+            <div class="fs-ep-nav" id="fsEpNav" style="display:none;">
+                <button class="ep-nav-btn" id="fsPrevEpBtn" aria-label="Tập trước" title="Tập trước">
                     <i class="fas fa-step-backward"></i>
                 </button>
-                <button class="control-btn ep-nav-btn" id="fsNextEpBtn" aria-label="Tập tiếp theo" title="Tập tiếp theo">
+                <button class="ep-list-btn" id="fsEpListBtn" aria-label="Danh sách tập">
+                    <i class="fas fa-list"></i> Tập
+                </button>
+                <button class="ep-nav-btn" id="fsNextEpBtn" aria-label="Tập tiếp theo" title="Tập tiếp theo">
                     <i class="fas fa-step-forward"></i>
                 </button>
             </div>
