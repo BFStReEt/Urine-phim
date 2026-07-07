@@ -15,6 +15,7 @@ let currentEpisodeIndex = 0;
 let currentPlayerMode = 'embed'; // embed, hls
 let hlsPlayerInstance = null;
 let fsControlsTimeout = null;
+let displayedSlugs = new Set();
 
 // Initialize on DOM Load
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,7 +30,7 @@ function initApp() {
 }
 
 // Helper: Parse YouTube URL to Embed URL
-function getYoutubeEmbedUrl(url) {
+function getYoutubeEmbedUrl(url, autoplay = 0) {
     if (!url) return null;
     let videoId = '';
     
@@ -52,7 +53,7 @@ function getYoutubeEmbedUrl(url) {
     }
     
     if (videoId) {
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&enablejsapi=1&rel=0`;
+        return `https://www.youtube.com/embed/${videoId}?autoplay=${autoplay}&mute=0&enablejsapi=1&rel=0`;
     }
     return null;
 }
@@ -147,33 +148,7 @@ function setupEventListeners() {
         }
     });
 
-    // Watch Trailer Button click event
-    const modalTrailerBtn = document.getElementById('modalTrailerBtn');
-    modalTrailerBtn.addEventListener('click', () => {
-        if (!currentMovie || !currentMovie.trailer_url) return;
 
-        const trailerSection = document.getElementById('modalTrailerSection');
-        const trailerIframe = document.getElementById('modalTrailerIframe');
-        
-        const embedUrl = getYoutubeEmbedUrl(currentMovie.trailer_url);
-        if (!embedUrl) return;
-
-        if (trailerSection.style.display === 'none') {
-            // Play trailer
-            trailerSection.style.display = 'block';
-            trailerIframe.src = embedUrl;
-            modalTrailerBtn.innerHTML = '<i class="fas fa-times-circle"></i> Đóng Trailer';
-            // Scroll smoothly to trailer section
-            setTimeout(() => {
-                trailerSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 100);
-        } else {
-            // Stop trailer
-            trailerIframe.src = '';
-            trailerSection.style.display = 'none';
-            modalTrailerBtn.innerHTML = '<i class="fab fa-youtube"></i> Xem Trailer';
-        }
-    });
 
     // Fullscreen Player Events
     document.getElementById('playerBackBtn').addEventListener('click', closeFullscreenPlayer);
@@ -392,6 +367,9 @@ async function fetchApi(url) {
 
 // Load Homepage Data (Newly updated, Single movies, Action, Series, Horror, Anime, SciFi, Costume, Comedy, Romance, Adventure, Crime)
 async function loadHomeData() {
+    // Reset displayed slugs to prevent duplications across rows
+    displayedSlugs.clear();
+
     // Inject skeletons for all rows
     const rows = ['new', 'single', 'action', 'series', 'horror', 'anime', 'scifi', 'historical', 'comedy', 'romance', 'adventure', 'crime'];
     rows.forEach(row => injectSkeletons(`track-${row}`, 8));
@@ -485,6 +463,9 @@ async function loadHomeData() {
 async function renderHeroBanner(movie) {
     if (!movie) return;
 
+    // Add to displayed slugs so it doesn't appear in rows
+    displayedSlugs.add(movie.slug);
+
     // Fetch movie detail to get backdrop poster and full description
     const resDetail = await fetchApi(`${API_BASE}/phim/${movie.slug}`);
     if (!resDetail || !resDetail.movie) return;
@@ -540,8 +521,22 @@ function renderTrack(movies, trackId, imgHelper, cdnPath) {
         return;
     }
 
-    let html = '';
+    // Filter out duplicate movies across homepage rows
+    const uniqueMovies = [];
     movies.forEach(movie => {
+        if (!displayedSlugs.has(movie.slug)) {
+            uniqueMovies.push(movie);
+            displayedSlugs.add(movie.slug);
+        }
+    });
+
+    if (uniqueMovies.length === 0) {
+        track.innerHTML = `<div class="error-msg">Không có phim mới</div>`;
+        return;
+    }
+
+    let html = '';
+    uniqueMovies.forEach(movie => {
         const imageUrl = imgHelper(movie.thumb_url || movie.poster_url, cdnPath);
         const movieYear = movie.year || 'N/A';
         const movieQuality = movie.quality || 'HD';
@@ -710,8 +705,6 @@ async function openMovieDetail(slug, autoPlay = false) {
     // Reset Trailer state
     document.getElementById('modalTrailerSection').style.display = 'none';
     document.getElementById('modalTrailerIframe').src = '';
-    document.getElementById('modalTrailerBtn').style.display = 'none';
-    document.getElementById('modalTrailerBtn').innerHTML = '<i class="fab fa-youtube"></i> Xem Trailer';
     
     // Close fullscreen player if active
     closeFullscreenPlayer();
@@ -755,11 +748,12 @@ async function openMovieDetail(slug, autoPlay = false) {
     const randomMatch = Math.floor(Math.random() * 15) + 85;
     document.getElementById('modalMatchScore').textContent = `${randomMatch}% Trùng khớp`;
 
-    // Configure Trailer Button visibility
+    // Load and show Trailer directly above episodes by default if present
     if (currentMovie.trailer_url) {
-        const embedUrl = getYoutubeEmbedUrl(currentMovie.trailer_url);
+        const embedUrl = getYoutubeEmbedUrl(currentMovie.trailer_url, 0); // autoplay = 0
         if (embedUrl) {
-            document.getElementById('modalTrailerBtn').style.display = 'inline-flex';
+            document.getElementById('modalTrailerSection').style.display = 'block';
+            document.getElementById('modalTrailerIframe').src = embedUrl;
         }
     }
 
@@ -1045,7 +1039,6 @@ function closeMovieDetail() {
     const trailerIframe = document.getElementById('modalTrailerIframe');
     if (trailerIframe) trailerIframe.src = '';
     document.getElementById('modalTrailerSection').style.display = 'none';
-    document.getElementById('modalTrailerBtn').innerHTML = '<i class="fab fa-youtube"></i> Xem Trailer';
     
     closeFullscreenPlayer();
 }
