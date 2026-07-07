@@ -232,6 +232,37 @@ function setupEventListeners() {
             loadCategoryPage(currentType, currentPage);
         }
     });
+
+    // Row Title & See All Card Click Events to navigate to the full Category/Genre list
+    document.addEventListener('click', (e) => {
+        const title = e.target.closest('.row-title');
+        const seeAll = e.target.closest('.see-all-card');
+        const target = title || seeAll;
+        
+        if (target) {
+            const tab = target.getAttribute('data-tab');
+            const genre = target.getAttribute('data-genre');
+            const name = target.getAttribute('data-name');
+
+            if (tab) {
+                // Find matching main nav link
+                const navLink = document.querySelector(`.nav-link[data-type="${tab}"]`);
+                if (navLink) {
+                    switchTab(tab, navLink);
+                }
+            } else if (genre && name) {
+                // Find matching dropdown item if exists
+                const dropdownItem = document.querySelector(`.dropdown-item[data-slug="${genre}"]`);
+                if (dropdownItem) {
+                    selectGenre(genre, name, dropdownItem);
+                } else {
+                    // Fallback
+                    const dummyItem = document.createElement('button');
+                    selectGenre(genre, name, dummyItem);
+                }
+            }
+        }
+    });
 }
 
 
@@ -557,14 +588,39 @@ function renderTrack(movies, trackId, imgHelper, cdnPath) {
         `;
     });
 
+    // Determine see-all target based on trackId to append a "Xem tất cả" card at the end of the horizontal track
+    let seeAllAttr = '';
+    if (trackId === 'track-single') seeAllAttr = 'data-tab="phim-le"';
+    else if (trackId === 'track-series') seeAllAttr = 'data-tab="phim-bo"';
+    else if (trackId === 'track-anime') seeAllAttr = 'data-tab="hoat-hinh"';
+    else if (trackId === 'track-action') seeAllAttr = 'data-genre="hanh-dong" data-name="Phim Hành Động"';
+    else if (trackId === 'track-horror') seeAllAttr = 'data-genre="kinh-di" data-name="Phim Kinh Dị"';
+    else if (trackId === 'track-scifi') seeAllAttr = 'data-genre="vien-tuong" data-name="Phim Viễn Tưởng"';
+    else if (trackId === 'track-historical') seeAllAttr = 'data-genre="co-trang" data-name="Phim Cổ Trang"';
+    else if (trackId === 'track-comedy') seeAllAttr = 'data-genre="hai-huoc" data-name="Phim Hài Hước"';
+    else if (trackId === 'track-romance') seeAllAttr = 'data-genre="tinh-cam" data-name="Phim Tình Cảm"';
+    else if (trackId === 'track-adventure') seeAllAttr = 'data-genre="phieu-luu" data-name="Phim Phiêu Lưu"';
+    else if (trackId === 'track-crime') seeAllAttr = 'data-genre="hinh-su" data-name="Phim Hình Sự"';
+
+    if (seeAllAttr) {
+        html += `
+            <div class="movie-card see-all-card" ${seeAllAttr}>
+                <div class="see-all-content">
+                    <i class="fas fa-arrow-circle-right"></i>
+                    <span>Xem tất cả</span>
+                </div>
+            </div>
+        `;
+    }
+
     track.innerHTML = html;
 
-    // Attach Click Events to Cards
-    const cards = track.querySelectorAll('.movie-card');
+    // Attach Click Events to Cards (excluding the See All card)
+    const cards = track.querySelectorAll('.movie-card:not(.see-all-card)');
     cards.forEach(card => {
         card.addEventListener('click', () => {
             const slug = card.getAttribute('data-slug');
-            openMovieDetail(slug);
+            if (slug) openMovieDetail(slug);
         });
     });
 }
@@ -573,6 +629,9 @@ function renderTrack(movies, trackId, imgHelper, cdnPath) {
 async function loadCategoryPage(type, page) {
     const grid = document.getElementById('categoryGrid');
     injectSkeletons('categoryGrid', 12);
+    
+    // Scroll window to top immediately on loading category page
+    window.scrollTo({ top: 0, behavior: 'instant' });
     
     // Disable pagination buttons while loading
     document.getElementById('prevPageBtn').disabled = true;

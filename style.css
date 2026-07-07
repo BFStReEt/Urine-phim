@@ -407,6 +407,32 @@ body {
     margin-bottom: 12px;
     color: var(--text-primary);
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.row-title:hover {
+    color: #FFFFFF;
+}
+
+.row-title .explore-all {
+    font-size: 12px;
+    font-weight: 600;
+    color: #54b9c5;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.row-title:hover .explore-all {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .row-slider-container {
@@ -1299,6 +1325,52 @@ body {
 
 .dropdown-item.active {
     color: var(--netflix-red);
+    font-weight: 700;
+}
+
+/* See All Card at the end of the track */
+.see-all-card {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255, 255, 255, 0.25);
+    background-color: rgba(20, 20, 20, 0.6) !important;
+    min-width: 170px;
+    height: 100%;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition-card);
+}
+
+.see-all-card:hover {
+    border-color: var(--netflix-red);
+    background-color: rgba(20, 20, 20, 0.9) !important;
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+}
+
+.see-all-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.see-all-content i {
+    font-size: 32px;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.see-all-card:hover .see-all-content i {
+    transform: translateX(5px);
+    color: var(--netflix-red);
+}
+
+.see-all-content span {
+    font-size: 14px;
     font-weight: 700;
 }
 

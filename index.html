@@ -115,7 +115,7 @@
 
                 <!-- Row 2: Phim lẻ -->
                 <div class="movie-row" id="row-single">
-                    <h2 class="row-title">Phim lẻ chọn lọc</h2>
+                    <h2 class="row-title" data-tab="phim-le">Phim lẻ chọn lọc <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-single" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-single">
@@ -127,7 +127,7 @@
 
                 <!-- Row 3: Phim hành động -->
                 <div class="movie-row" id="row-action">
-                    <h2 class="row-title">Phim hành động kịch tính</h2>
+                    <h2 class="row-title" data-genre="hanh-dong" data-name="Phim Hành Động">Phim hành động kịch tính <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-action" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-action">
@@ -139,7 +139,7 @@
 
                 <!-- Row 4: Phim bộ -->
                 <div class="movie-row" id="row-series">
-                    <h2 class="row-title">Phim bộ thịnh hành</h2>
+                    <h2 class="row-title" data-tab="phim-bo">Phim bộ thịnh hành <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-series" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-series">
@@ -151,7 +151,7 @@
 
                 <!-- Row 5: Phim kinh dị -->
                 <div class="movie-row" id="row-horror">
-                    <h2 class="row-title">Phim kinh dị rùng rợn</h2>
+                    <h2 class="row-title" data-genre="kinh-di" data-name="Phim Kinh Dị">Phim kinh dị rùng rợn <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-horror" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-horror">
@@ -163,7 +163,7 @@
 
                 <!-- Row 6: Hoạt hình -->
                 <div class="movie-row" id="row-anime">
-                    <h2 class="row-title">Hoạt hình & Anime nổi bật</h2>
+                    <h2 class="row-title" data-tab="hoat-hinh">Hoạt hình & Anime nổi bật <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-anime" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-anime">
@@ -175,7 +175,7 @@
 
                 <!-- Row 7: Phim viễn tưởng -->
                 <div class="movie-row" id="row-scifi">
-                    <h2 class="row-title">Phim viễn tưởng & Tương lai</h2>
+                    <h2 class="row-title" data-genre="vien-tuong" data-name="Phim Viễn Tưởng">Phim viễn tưởng & Tương lai <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-scifi" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-scifi">
@@ -187,7 +187,7 @@
 
                 <!-- Row 8: Phim cổ trang -->
                 <div class="movie-row" id="row-historical">
-                    <h2 class="row-title">Phim cổ trang Trung Quốc & Dã sử</h2>
+                    <h2 class="row-title" data-genre="co-trang" data-name="Phim Cổ Trang">Phim cổ trang Trung Quốc & Dã sử <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-historical" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-historical">
@@ -199,7 +199,7 @@
 
                 <!-- Row 9: Phim hài hước -->
                 <div class="movie-row" id="row-comedy">
-                    <h2 class="row-title">Phim hài hước vui nhộn</h2>
+                    <h2 class="row-title" data-genre="hai-huoc" data-name="Phim Hài Hước">Phim hài hước vui nhộn <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-comedy" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-comedy">
@@ -211,7 +211,7 @@
 
                 <!-- Row 10: Phim tình cảm -->
                 <div class="movie-row" id="row-romance">
-                    <h2 class="row-title">Phim tình cảm lãng mạn</h2>
+                    <h2 class="row-title" data-genre="tinh-cam" data-name="Phim Tình Cảm">Phim tình cảm lãng mạn <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-romance" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-romance">
@@ -223,7 +223,7 @@
 
                 <!-- Row 11: Phim phiêu lưu -->
                 <div class="movie-row" id="row-adventure">
-                    <h2 class="row-title">Phim phiêu lưu kỳ thú</h2>
+                    <h2 class="row-title" data-genre="phieu-luu" data-name="Phim Phiêu Lưu">Phim phiêu lưu kỳ thú <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-adventure" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-adventure">
@@ -235,7 +235,7 @@
 
                 <!-- Row 12: Phim hình sự -->
                 <div class="movie-row" id="row-crime">
-                    <h2 class="row-title">Phim hình sự & Kịch tính</h2>
+                    <h2 class="row-title" data-genre="hinh-su" data-name="Phim Hình Sự">Phim hình sự & Kịch tính <span class="explore-all">Xem tất cả <i class="fas fa-chevron-right"></i></span></h2>
                     <div class="row-slider-container">
                         <button class="slider-arrow arrow-left" id="prev-crime" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
                         <div class="movie-track" id="track-crime">
