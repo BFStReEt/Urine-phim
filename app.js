@@ -417,7 +417,7 @@ function injectSkeletons(containerId, count = 6) {
 
 // Setup Slide Navigation Arrows
 function setupSliders() {
-    const rows = ['new', 'single', 'action', 'series', 'horror', 'anime', 'scifi', 'historical'];
+    const rows = ['new', 'single', 'action', 'series', 'horror', 'anime', 'scifi', 'historical', 'comedy', 'romance', 'adventure', 'crime'];
     rows.forEach(row => {
         const track = document.getElementById(`track-${row}`);
         const prev = document.getElementById(`prev-${row}`);
@@ -447,10 +447,10 @@ async function fetchApi(url) {
     }
 }
 
-// Load Homepage Data (Newly updated, Single movies, Action, Series, Horror, Anime, SciFi, Costume)
+// Load Homepage Data (Newly updated, Single movies, Action, Series, Horror, Anime, SciFi, Costume, Comedy, Romance, Adventure, Crime)
 async function loadHomeData() {
     // Inject skeletons for all rows
-    const rows = ['new', 'single', 'action', 'series', 'horror', 'anime', 'scifi', 'historical'];
+    const rows = ['new', 'single', 'action', 'series', 'horror', 'anime', 'scifi', 'historical', 'comedy', 'romance', 'adventure', 'crime'];
     rows.forEach(row => injectSkeletons(`track-${row}`, 8));
 
     // 1. Newly updated
@@ -507,6 +507,34 @@ async function loadHomeData() {
     if (resHist && resHist.data) {
         const cdn = resHist.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resHist.data.items, 'track-historical', getImageUrl, cdn);
+    }
+
+    // 9. Comedy Movies (Genre: hai-huoc)
+    const resComedy = await fetchApi(`${API_BASE}/v1/api/the-loai/hai-huoc?page=1`);
+    if (resComedy && resComedy.data) {
+        const cdn = resComedy.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
+        renderTrack(resComedy.data.items, 'track-comedy', getImageUrl, cdn);
+    }
+
+    // 10. Romance Movies (Genre: tinh-cam)
+    const resRomance = await fetchApi(`${API_BASE}/v1/api/the-loai/tinh-cam?page=1`);
+    if (resRomance && resRomance.data) {
+        const cdn = resRomance.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
+        renderTrack(resRomance.data.items, 'track-romance', getImageUrl, cdn);
+    }
+
+    // 11. Adventure Movies (Genre: phieu-luu)
+    const resAdventure = await fetchApi(`${API_BASE}/v1/api/the-loai/phieu-luu?page=1`);
+    if (resAdventure && resAdventure.data) {
+        const cdn = resAdventure.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
+        renderTrack(resAdventure.data.items, 'track-adventure', getImageUrl, cdn);
+    }
+
+    // 12. Crime Movies (Genre: hinh-su)
+    const resCrime = await fetchApi(`${API_BASE}/v1/api/the-loai/hinh-su?page=1`);
+    if (resCrime && resCrime.data) {
+        const cdn = resCrime.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
+        renderTrack(resCrime.data.items, 'track-crime', getImageUrl, cdn);
     }
 }
 
