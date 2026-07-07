@@ -10,7 +10,7 @@
     --border-color: rgba(255, 255, 255, 0.1);
     --glass-bg: rgba(20, 20, 20, 0.75);
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --font-heading: 'Outfit', sans-serif;
+    --font-heading: 'Inter', sans-serif;
     --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     --transition-card: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
@@ -149,7 +149,7 @@ body {
     border-color: rgba(255, 255, 255, 0.6);
     background: rgba(0, 0, 0, 0.8);
     justify-content: flex-start;
-    padding: 0 10px;
+    padding: 0 10px 0 0;
 }
 
 .search-btn {
@@ -161,7 +161,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 14px;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
 }
 
 .search-input {
@@ -182,7 +184,10 @@ body {
 
 .search-box.expanded .search-input {
     width: 100%;
+<<<<<<< HEAD
     flex: 1 1 auto;
+=======
+>>>>>>> 8998f73eaeece966ff6b8bf35057ac904228d71d
     opacity: 1;
     pointer-events: auto;
 }
@@ -521,6 +526,22 @@ body {
     transition: var(--transition-card);
     aspect-ratio: 2/3;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.card-badge-no-source {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(229, 9, 20, 0.95);
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 3px;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .movie-card-img {
@@ -997,11 +1018,12 @@ body {
 /* Bottom Player Controls Overlay Panel */
 .fs-player-controls {
     position: absolute;
-    bottom: 85px; /* Floats above iframe/native player bar to prevent overlapping buttons */
+    bottom: 85px;
+    left: 30px;
     right: 30px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
     z-index: 20020;
     transition: opacity 0.4s ease;
 }
@@ -1257,7 +1279,233 @@ body {
     object-fit: contain;
 }
 
-/* Footer styling */
+/* === Episode Navigation Controls (integrated in bottom bar) === */
+.fs-ep-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: auto;
+}
+
+/* Episode list button - pill style like Server button */
+.ep-list-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    backdrop-filter: blur(6px);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.ep-list-btn:hover {
+    background: var(--netflix-red);
+    border-color: var(--netflix-red);
+}
+
+/* Prev / Next episode arrow buttons */
+.ep-nav-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ep-nav-btn:hover {
+    background: rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+    border-color: rgba(255,255,255,0.4) !important;
+    transform: scale(1.1);
+}
+
+.ep-nav-btn:disabled {
+    opacity: 0.18;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* === Next Episode Overlay (Netflix-style, bottom-right corner) === */
+.next-ep-overlay {
+    position: absolute;
+    bottom: 90px;
+    right: 30px;
+    z-index: 20050;
+    animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px) scale(0.92); }
+    to   { opacity: 1; transform: translateX(0)   scale(1); }
+}
+
+.next-ep-card {
+    background: rgba(18, 18, 18, 0.97);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 16px 20px;
+    min-width: 210px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.next-ep-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--netflix-red);
+    letter-spacing: 1.2px;
+}
+
+.next-ep-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.next-ep-btn {
+    background: var(--netflix-red);
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.next-ep-btn:hover {
+    background: #f40612;
+    transform: scale(1.04);
+}
+
+/* === Episode Panel — Right-side drawer (Netflix style) === */
+.fs-ep-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 320px;
+    background: rgba(13, 13, 13, 0.98);
+    backdrop-filter: blur(24px);
+    border-left: 1px solid rgba(255,255,255,0.07);
+    padding: 0;
+    z-index: 20100;
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.fs-ep-panel.open {
+    transform: translateX(0);
+}
+
+.fs-ep-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+}
+
+.fs-ep-panel-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 6px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.fs-ep-panel-close:hover {
+    color: #fff;
+}
+
+.fs-ep-panel-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 12px 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.fs-ep-panel-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 11px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fs-ep-panel-btn::before {
+    content: '';
+    width: 3px;
+    height: 20px;
+    background: transparent;
+    border-radius: 2px;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+}
+
+.fs-ep-panel-btn:hover {
+    background: rgba(255,255,255,0.07);
+    color: #fff;
+}
+
+.fs-ep-panel-btn.active {
+    color: #fff;
+    font-weight: 700;
+}
+
+.fs-ep-panel-btn.active::before {
+    background: var(--netflix-red);
+}
+
+/* Remove the old separate toggle button - no longer used */
+.fs-ep-panel-toggle {
+    display: none !important;
+}
+
+
 .footer {
     padding: 50px 15% 40px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);

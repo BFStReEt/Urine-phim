@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApp() {
     setupEventListeners();
     setupSliders();
+    initEpisodeNavListeners();
     loadHomeData();
 }
 
@@ -416,94 +417,98 @@ async function loadHomeData() {
     // Reset displayed slugs to prevent duplications across rows
     displayedSlugs.clear();
 
+    const YEAR = 2026;
+
     // Inject skeletons for all rows
     const rows = ['new', 'single', 'action', 'series', 'horror', 'anime', 'scifi', 'historical', 'comedy', 'romance', 'adventure', 'crime'];
     rows.forEach(row => injectSkeletons(`track-${row}`, 8));
 
     // 1. Newly updated
-    const resNew = await fetchApi(`${API_BASE}/danh-sach/phim-moi-cap-nhat?page=1`);
-    if (resNew && resNew.items && resNew.items.length > 0) {
-        renderHeroBanner(resNew.items[0]);
-        renderTrack(resNew.items, 'track-new', getImageUrl, resNew.pathImage);
+    const resNew = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-moi-cap-nhat?page=1&year=${YEAR}`);
+    if (resNew && resNew.data && resNew.data.items && resNew.data.items.length > 0) {
+        const cdn = resNew.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
+        renderHeroBanner(resNew.data.items[0]);
+        renderTrack(resNew.data.items, 'track-new', getImageUrl, cdn);
     }
 
     // 2. Single Movies
-    const resSingle = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-le?page=1`);
+    const resSingle = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-le?page=1&year=${YEAR}`);
     if (resSingle && resSingle.data) {
         const cdn = resSingle.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resSingle.data.items, 'track-single', getImageUrl, cdn);
     }
 
     // 3. Action Movies (Genre)
-    const resAction = await fetchApi(`${API_BASE}/v1/api/the-loai/hanh-dong?page=1`);
+    const resAction = await fetchApi(`${API_BASE}/v1/api/the-loai/hanh-dong?page=1&year=${YEAR}`);
     if (resAction && resAction.data) {
         const cdn = resAction.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resAction.data.items, 'track-action', getImageUrl, cdn);
     }
 
     // 4. TV Series
-    const resSeries = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-bo?page=1`);
+    const resSeries = await fetchApi(`${API_BASE}/v1/api/danh-sach/phim-bo?page=1&year=${YEAR}`);
     if (resSeries && resSeries.data) {
         const cdn = resSeries.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resSeries.data.items, 'track-series', getImageUrl, cdn);
     }
 
     // 5. Horror Movies (Genre)
-    const resHorror = await fetchApi(`${API_BASE}/v1/api/the-loai/kinh-di?page=1`);
+    const resHorror = await fetchApi(`${API_BASE}/v1/api/the-loai/kinh-di?page=1&year=${YEAR}`);
     if (resHorror && resHorror.data) {
         const cdn = resHorror.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resHorror.data.items, 'track-horror', getImageUrl, cdn);
     }
 
     // 6. Anime
-    const resAnime = await fetchApi(`${API_BASE}/v1/api/danh-sach/hoat-hinh?page=1`);
+    const resAnime = await fetchApi(`${API_BASE}/v1/api/danh-sach/hoat-hinh?page=1&year=${YEAR}`);
     if (resAnime && resAnime.data) {
         const cdn = resAnime.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resAnime.data.items, 'track-anime', getImageUrl, cdn);
     }
 
     // 7. Sci-Fi Movies (Genre)
-    const resSciFi = await fetchApi(`${API_BASE}/v1/api/the-loai/vien-tuong?page=1`);
+    const resSciFi = await fetchApi(`${API_BASE}/v1/api/the-loai/vien-tuong?page=1&year=${YEAR}`);
     if (resSciFi && resSciFi.data) {
         const cdn = resSciFi.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resSciFi.data.items, 'track-scifi', getImageUrl, cdn);
     }
 
     // 8. Historical / Costume Movies (Genre)
-    const resHist = await fetchApi(`${API_BASE}/v1/api/the-loai/co-trang?page=1`);
+    const resHist = await fetchApi(`${API_BASE}/v1/api/the-loai/co-trang?page=1&year=${YEAR}`);
     if (resHist && resHist.data) {
         const cdn = resHist.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resHist.data.items, 'track-historical', getImageUrl, cdn);
     }
 
     // 9. Comedy Movies (Genre: hai-huoc)
-    const resComedy = await fetchApi(`${API_BASE}/v1/api/the-loai/hai-huoc?page=1`);
+    const resComedy = await fetchApi(`${API_BASE}/v1/api/the-loai/hai-huoc?page=1&year=${YEAR}`);
     if (resComedy && resComedy.data) {
         const cdn = resComedy.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resComedy.data.items, 'track-comedy', getImageUrl, cdn);
     }
 
     // 10. Romance Movies (Genre: tinh-cam)
-    const resRomance = await fetchApi(`${API_BASE}/v1/api/the-loai/tinh-cam?page=1`);
+    const resRomance = await fetchApi(`${API_BASE}/v1/api/the-loai/tinh-cam?page=1&year=${YEAR}`);
     if (resRomance && resRomance.data) {
         const cdn = resRomance.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resRomance.data.items, 'track-romance', getImageUrl, cdn);
     }
 
     // 11. Adventure Movies (Genre: phieu-luu)
-    const resAdventure = await fetchApi(`${API_BASE}/v1/api/the-loai/phieu-luu?page=1`);
+    const resAdventure = await fetchApi(`${API_BASE}/v1/api/the-loai/phieu-luu?page=1&year=${YEAR}`);
     if (resAdventure && resAdventure.data) {
         const cdn = resAdventure.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resAdventure.data.items, 'track-adventure', getImageUrl, cdn);
     }
 
     // 12. Crime Movies (Genre: hinh-su)
-    const resCrime = await fetchApi(`${API_BASE}/v1/api/the-loai/hinh-su?page=1`);
+    const resCrime = await fetchApi(`${API_BASE}/v1/api/the-loai/hinh-su?page=1&year=${YEAR}`);
     if (resCrime && resCrime.data) {
         const cdn = resCrime.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderTrack(resCrime.data.items, 'track-crime', getImageUrl, cdn);
     }
 }
+
 
 // Render Featured Hero Banner
 async function renderHeroBanner(movie) {
@@ -599,8 +604,12 @@ function renderTrack(movies, trackId, imgHelper, cdnPath) {
         const movieQuality = movie.quality || 'HD';
         const movieLang = movie.lang || 'Vietsub';
 
+        const isComingSoon = movie.episode_current && (movie.episode_current.toLowerCase().includes('trailer') || (!movie.last_episodes || movie.last_episodes.length === 0));
+        const badgeHtml = isComingSoon ? `<span class="card-badge-no-source">Chưa có</span>` : '';
+
         html += `
             <div class="movie-card" data-slug="${movie.slug}">
+                ${badgeHtml}
                 <img src="${imageUrl}" alt="${movie.name}" class="movie-card-img" loading="lazy">
                 <div class="movie-card-info">
                     <h3 class="card-title">${movie.name}</h3>
@@ -712,8 +721,12 @@ function renderGrid(movies, gridId, imgHelper, cdnPath) {
         const movieQuality = movie.quality || 'HD';
         const movieLang = movie.lang || 'Vietsub';
 
+        const isComingSoon = movie.episode_current && (movie.episode_current.toLowerCase().includes('trailer') || (!movie.last_episodes || movie.last_episodes.length === 0));
+        const badgeHtml = isComingSoon ? `<span class="card-badge-no-source">Chưa có</span>` : '';
+
         html += `
             <div class="movie-card" data-slug="${movie.slug}">
+                ${badgeHtml}
                 <img src="${imageUrl}" alt="${movie.name}" class="movie-card-img" loading="lazy">
                 <div class="movie-card-info">
                     <h3 class="card-title">${movie.name}</h3>
@@ -988,9 +1001,133 @@ function playEpisode(serverIndex, episodeIndex) {
     // Reset controls auto-hide timer
     showFsControls();
 
+    // Update episode navigation UI
+    updateEpisodeNavUI();
+
     // Load Stream Source in fullscreen player
     loadVideoSource(ep.link_embed, ep.link_m3u8);
 }
+
+// Update prev/next buttons, episode panel, and next-ep overlay based on current episode
+function updateEpisodeNavUI() {
+    if (!currentMovie || !currentMovie.episodes) return;
+    const server = currentMovie.episodes[currentServerIndex];
+    if (!server || !server.server_data) return;
+    const totalEps = server.server_data.length;
+
+    // Prev / Next nav buttons
+    const prevBtn = document.getElementById('fsPrevEpBtn');
+    const nextBtn = document.getElementById('fsNextEpBtn');
+    const epNav = document.getElementById('fsEpNav');
+
+    if (totalEps > 1) {
+        epNav.style.display = 'flex';
+        prevBtn.disabled = currentEpisodeIndex <= 0;
+        nextBtn.disabled = currentEpisodeIndex >= totalEps - 1;
+    } else {
+        epNav.style.display = 'none';
+    }
+
+    // Close panel on episode switch (don't auto-open)
+    closeEpPanel();
+
+    // Episode panel grid
+    const panelGrid = document.getElementById('fsEpPanelGrid');
+    panelGrid.innerHTML = '';
+    server.server_data.forEach((ep, idx) => {
+        const epLabel = ep.name || `Tập ${idx + 1}`;
+        const btn = document.createElement('button');
+        btn.className = 'fs-ep-panel-btn' + (idx === currentEpisodeIndex ? ' active' : '');
+        btn.textContent = epLabel;
+        btn.addEventListener('click', () => {
+            closeEpPanel();
+            playEpisode(currentServerIndex, idx);
+        });
+        panelGrid.appendChild(btn);
+    });
+
+    // Scroll active episode into view — only when panel is open to avoid browser revealing it
+    setTimeout(() => {
+        const panel = document.getElementById('fsEpPanel');
+        if (!panel.classList.contains('open')) return;
+        const activePanelBtn = panelGrid.querySelector('.fs-ep-panel-btn.active');
+        if (activePanelBtn) activePanelBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 50);
+
+    // Update next-ep overlay title if there is a next episode
+    const nextEpOverlay = document.getElementById('nextEpOverlay');
+    nextEpOverlay.style.display = 'none'; // hide when switching episodes
+    if (currentEpisodeIndex < totalEps - 1) {
+        const nextEp = server.server_data[currentEpisodeIndex + 1];
+        document.getElementById('nextEpTitle').textContent = nextEp.name || `Tập ${currentEpisodeIndex + 2}`;
+    }
+}
+
+function openEpPanel() {
+    document.getElementById('fsEpPanel').classList.add('open');
+    // Scroll active episode into view after open animation
+    setTimeout(() => {
+        const active = document.querySelector('#fsEpPanelGrid .fs-ep-panel-btn.active');
+        if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 350);
+}
+
+function closeEpPanel() {
+    document.getElementById('fsEpPanel').classList.remove('open');
+}
+
+// Wire up episode navigation event listeners (called once on DOM ready)
+function initEpisodeNavListeners() {
+    // Prev episode
+    document.getElementById('fsPrevEpBtn').addEventListener('click', () => {
+        if (currentEpisodeIndex > 0) playEpisode(currentServerIndex, currentEpisodeIndex - 1);
+    });
+
+    // Next episode
+    document.getElementById('fsNextEpBtn').addEventListener('click', () => {
+        const server = currentMovie && currentMovie.episodes[currentServerIndex];
+        if (server && currentEpisodeIndex < server.server_data.length - 1) {
+            playEpisode(currentServerIndex, currentEpisodeIndex + 1);
+        }
+    });
+
+    // Next episode from overlay button
+    document.getElementById('nextEpOverlayBtn').addEventListener('click', () => {
+        const server = currentMovie && currentMovie.episodes[currentServerIndex];
+        if (server && currentEpisodeIndex < server.server_data.length - 1) {
+            document.getElementById('nextEpOverlay').style.display = 'none';
+            playEpisode(currentServerIndex, currentEpisodeIndex + 1);
+        }
+    });
+
+    // Episode list button (center of nav bar)
+    document.getElementById('fsEpListBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const panel = document.getElementById('fsEpPanel');
+        panel.classList.contains('open') ? closeEpPanel() : openEpPanel();
+    });
+
+    // Episode panel close X
+    document.getElementById('fsEpPanelClose').addEventListener('click', closeEpPanel);
+
+    // HLS video timeupdate → show next-ep overlay in last 30s
+    document.getElementById('fsHlsVideoPlayer').addEventListener('timeupdate', () => {
+        const video = document.getElementById('fsHlsVideoPlayer');
+        if (!video.duration || video.duration === Infinity) return;
+        const server = currentMovie && currentMovie.episodes[currentServerIndex];
+        if (!server) return;
+        const hasNext = currentEpisodeIndex < server.server_data.length - 1;
+        const overlay = document.getElementById('nextEpOverlay');
+        const remaining = video.duration - video.currentTime;
+        if (hasNext && remaining <= 30 && remaining > 0) {
+            overlay.style.display = 'flex';
+        } else {
+            overlay.style.display = 'none';
+        }
+    });
+}
+
+
 
 // Load Video Stream Sources based on current mode
 function loadVideoSource(embedUrl, m3u8Url) {
@@ -1023,9 +1160,15 @@ function loadVideoSource(embedUrl, m3u8Url) {
     }
 
     if (currentPlayerMode === 'embed') {
+        if (!embedUrl && m3u8Url) {
+            // Auto-fallback: switch to HLS mode if Embed link is missing but HLS is available
+            switchPlayerMode('hls');
+            return;
+        }
+        
         fsEmbed.style.display = 'block';
         fsHlsWrapper.style.display = 'none';
-        fsEmbed.src = embedUrl;
+        fsEmbed.src = embedUrl || '';
         fsPipBtn.style.display = 'none'; // PiP not supported on iframe
         fsFullscreenBtn.style.display = 'none'; // Fullscreen overlay button supported
     } else {
@@ -1035,7 +1178,12 @@ function loadVideoSource(embedUrl, m3u8Url) {
         fsFullscreenBtn.style.display = 'block'; // Fullscreen overlay button supported
         
         if (!m3u8Url) {
-            fsError.style.display = 'flex';
+            if (embedUrl) {
+                // Auto-fallback: switch to Embed mode if HLS link is missing but Embed is available
+                switchPlayerMode('embed');
+            } else {
+                fsError.style.display = 'flex';
+            }
             return;
         }
 
@@ -1098,22 +1246,24 @@ function showFsControls() {
 
     if (fsPlayer.style.display !== 'flex') return;
 
-    // Show elements & reset cursor
+    // Show controls & reset cursor on mouse move
     backBtn.classList.remove('hidden');
     fsPlayerControls.classList.remove('hidden');
     fsPlayer.style.cursor = 'default';
 
-    // Clear previous timer and set new one
+    // Autohide both back button AND controls bar together (synced with native player controls)
     clearTimeout(fsControlsTimeout);
     fsControlsTimeout = setTimeout(() => {
         if (fsPlayer.style.display === 'flex') {
             backBtn.classList.add('hidden');
-            fsPlayerControls.classList.add('hidden');
-            fsSettingsMenu.classList.remove('open'); // close settings menu if open
-            fsPlayer.style.cursor = 'none'; // hide cursor on idle
+            fsPlayerControls.classList.add('hidden');   // hide together with native controls
+            fsSettingsMenu.classList.remove('open');     // close settings menu if open
+            fsPlayer.style.cursor = 'none';              // hide cursor on idle
         }
     }, 3000);
 }
+
+
 
 // Stop Video playback and free memory
 function stopVideoPlayer() {
