@@ -594,8 +594,12 @@ function renderTrack(movies, trackId, imgHelper, cdnPath) {
         const movieQuality = movie.quality || 'HD';
         const movieLang = movie.lang || 'Vietsub';
 
+        const isComingSoon = movie.episode_current && (movie.episode_current.toLowerCase().includes('trailer') || (!movie.last_episodes || movie.last_episodes.length === 0));
+        const badgeHtml = isComingSoon ? `<span class="card-badge-no-source">Chưa có</span>` : '';
+
         html += `
             <div class="movie-card" data-slug="${movie.slug}">
+                ${badgeHtml}
                 <img src="${imageUrl}" alt="${movie.name}" class="movie-card-img" loading="lazy">
                 <div class="movie-card-info">
                     <h3 class="card-title">${movie.name}</h3>
@@ -707,8 +711,12 @@ function renderGrid(movies, gridId, imgHelper, cdnPath) {
         const movieQuality = movie.quality || 'HD';
         const movieLang = movie.lang || 'Vietsub';
 
+        const isComingSoon = movie.episode_current && (movie.episode_current.toLowerCase().includes('trailer') || (!movie.last_episodes || movie.last_episodes.length === 0));
+        const badgeHtml = isComingSoon ? `<span class="card-badge-no-source">Chưa có</span>` : '';
+
         html += `
             <div class="movie-card" data-slug="${movie.slug}">
+                ${badgeHtml}
                 <img src="${imageUrl}" alt="${movie.name}" class="movie-card-img" loading="lazy">
                 <div class="movie-card-info">
                     <h3 class="card-title">${movie.name}</h3>
