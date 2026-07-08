@@ -22,6 +22,53 @@ let activePreviewCard = null;
 const movieDetailCache = new Map();
 let hasUnlockedAutoplay = false;
 
+function stripHtml(value) {
+    return String(value || '').replace(/<[^>]*>?/gm, '').trim();
+}
+
+function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    }[char]));
+}
+
+function getMovieEpisodeText(movie) {
+    return movie.episode_current || movie.time || 'Đang cập nhật';
+}
+
+function renderCardInfoOverlay(movie, loadingText = '') {
+    const description = stripHtml(movie.content || movie.description);
+    const shortDescription = description ? description.slice(0, 150) : loadingText;
+    const categoryText = Array.isArray(movie.category) ? movie.category.map(item => item.name).filter(Boolean).slice(0, 3).join(', ') : '';
+
+    return `
+        <div class="movie-card-hover-info">
+            <div class="hover-info-main">
+                <div class="hover-info-actions" aria-hidden="true">
+                    <button class="hover-action-btn hover-action-primary" tabindex="-1"><i class="fas fa-play"></i></button>
+                    <button class="hover-action-btn" tabindex="-1"><i class="fas fa-plus"></i></button>
+                    <button class="hover-action-btn" tabindex="-1"><i class="fas fa-thumbs-up"></i></button>
+                    <button class="hover-action-btn hover-action-more" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+                </div>
+                <h3 class="hover-info-title">${escapeHtml(movie.name || 'Đang cập nhật')}</h3>
+                ${movie.origin_name ? `<p class="hover-info-subtitle">${escapeHtml(movie.origin_name)}</p>` : ''}
+                <div class="hover-info-meta">
+                    <span>${escapeHtml(movie.year || 'N/A')}</span>
+                    <span>${escapeHtml(movie.quality || 'HD')}</span>
+                    <span>${escapeHtml(movie.lang || 'Vietsub')}</span>
+                </div>
+                <p class="hover-info-episode">${escapeHtml(getMovieEpisodeText(movie))}</p>
+                ${categoryText ? `<p class="hover-info-category">${escapeHtml(categoryText)}</p>` : ''}
+                <p class="hover-info-desc">${escapeHtml(shortDescription || 'Đang tải thông tin phim...')}</p>
+            </div>
+        </div>
+    `;
+}
+
 // Initialize on DOM Load
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
@@ -513,29 +560,15 @@ async function showCardPreview(card) {
         hideCardPreview(activePreviewCard);
     }
 
+    card.classList.add('preview-active');
+
     const movie = await fetchMovieDetail(card.getAttribute('data-slug'));
     if (!movie || activePreviewCard !== card) return;
 
-    const previewUrl = getYoutubeEmbedUrl(movie.trailer_url, {
-        autoplay: 1,
-        mute: 1,
-        controls: 0,
-        loop: 1
-    });
-
-    if (!previewUrl) return;
-
-    const previewFrame = card.querySelector('.movie-card-preview-frame');
-    if (!previewFrame) return;
-
-    card.classList.remove('preview-active');
-    previewFrame.onload = null;
-    previewFrame.onload = () => {
-        if (activePreviewCard === card) {
-            card.classList.add('preview-active');
-        }
-    };
-    previewFrame.src = previewUrl;
+    const infoOverlay = card.querySelector('.movie-card-hover-info');
+    if (infoOverlay) {
+        infoOverlay.outerHTML = renderCardInfoOverlay(movie);
+    }
 }
 
 function hideCardPreview(card) {
@@ -544,12 +577,6 @@ function hideCardPreview(card) {
     clearTimeout(card.previewTimer);
     card.previewTimer = null;
     card.classList.remove('preview-active');
-
-    const previewFrame = card.querySelector('.movie-card-preview-frame');
-    if (previewFrame) {
-        previewFrame.onload = null;
-        previewFrame.src = '';
-    }
 
     if (activePreviewCard === card) {
         activePreviewCard = null;
@@ -563,7 +590,7 @@ function attachPreviewBehavior(cards) {
             activePreviewCard = card;
             card.previewTimer = setTimeout(() => {
                 showCardPreview(card);
-            }, 900);
+            }, 250);
         });
 
         card.addEventListener('mouseleave', () => {
@@ -906,9 +933,7 @@ function renderTrack(movies, trackId, imgHelper, cdnPath) {
             <div class="movie-card" data-slug="${movie.slug}">
                 ${badgeHtml}
                 <img src="${imageUrl}" alt="${movie.name}" class="movie-card-img" loading="lazy">
-                <div class="movie-card-preview">
-                    <iframe src="" class="movie-card-preview-frame" title="Preview ${movie.name}" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" tabindex="-1"></iframe>
-                </div>
+                ${renderCardInfoOverlay(movie, 'Đang tải thông tin phim...')}
                 <div class="movie-card-info">
                     <h3 class="card-title">${movie.name}</h3>
                     <div class="card-meta">
@@ -1027,9 +1052,7 @@ function renderGrid(movies, gridId, imgHelper, cdnPath) {
             <div class="movie-card" data-slug="${movie.slug}">
                 ${badgeHtml}
                 <img src="${imageUrl}" alt="${movie.name}" class="movie-card-img" loading="lazy">
-                <div class="movie-card-preview">
-                    <iframe src="" class="movie-card-preview-frame" title="Preview ${movie.name}" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin" tabindex="-1"></iframe>
-                </div>
+                ${renderCardInfoOverlay(movie, 'Đang tải thông tin phim...')}
                 <div class="movie-card-info">
                     <h3 class="card-title">${movie.name}</h3>
                     <div class="card-meta">
