@@ -17,7 +17,7 @@ let hlsPlayerInstance = null;
 let fsControlsTimeout = null;
 let displayedSlugs = new Set();
 let currentHeroMovie = null;
-let heroPreviewMuted = false;
+let heroPreviewMuted = localStorage.getItem('hero_preview_muted') !== 'false';
 let activePreviewCard = null;
 const movieDetailCache = new Map();
 let hasUnlockedAutoplay = false;
@@ -311,6 +311,7 @@ function setupEventListeners() {
         e.preventDefault();
         e.stopPropagation();
         heroPreviewMuted = !heroPreviewMuted;
+        localStorage.setItem('hero_preview_muted', heroPreviewMuted ? 'true' : 'false');
         updateHeroMuteButton();
 
         if (!hasUnlockedAutoplay) {
@@ -646,37 +647,11 @@ async function showCardPreview(card) {
     const movie = await fetchMovieDetail(card.getAttribute('data-slug'));
     if (!movie || activePreviewCard !== card) return;
 
-    const infoOverlay = card.querySelector('.movie-card-hover-info');
-    if (infoOverlay) {
-        infoOverlay.outerHTML = renderCardInfoOverlay(movie);
-    }
-
-    // Add video preview if movie has a trailer
-    if (movie.trailer_url) {
-        const videoId = getYoutubeVideoId(movie.trailer_url);
-        if (videoId) {
-            // Check if container already exists
-            let videoContainer = card.querySelector('.card-video-container');
-            if (!videoContainer) {
-                videoContainer = document.createElement('div');
-                videoContainer.className = 'card-video-container';
-                // Insert before the hover-info overlay
-                const currentOverlay = card.querySelector('.movie-card-hover-info');
-                if (currentOverlay) {
-                    card.insertBefore(videoContainer, currentOverlay);
-                } else {
-                    card.appendChild(videoContainer);
-                }
-            }
-            videoContainer.innerHTML = `
-                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1"
-                        title="Trailer preview"
-                        frameborder="0"
-                        allow="autoplay; encrypted-media"
-                        class="card-preview-iframe"></iframe>
-            `;
-            card.classList.add('has-video-preview');
-        }
+    // Directly update the description element in DOM to prevent layout jumping
+    const descEl = card.querySelector('.hover-info-desc');
+    if (descEl) {
+        const description = stripHtml(movie.content || movie.description || '');
+        descEl.textContent = description ? description.slice(0, 150) + (description.length > 150 ? '...' : '') : 'Không có mô tả phim.';
     }
 }
 
@@ -686,13 +661,6 @@ function hideCardPreview(card) {
     clearTimeout(card.previewTimer);
     card.previewTimer = null;
     card.classList.remove('preview-active');
-    card.classList.remove('has-video-preview');
-
-    // Remove video preview iframe
-    const videoContainer = card.querySelector('.card-video-container');
-    if (videoContainer) {
-        videoContainer.remove();
-    }
 
     if (activePreviewCard === card) {
         activePreviewCard = null;
