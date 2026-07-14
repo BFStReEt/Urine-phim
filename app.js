@@ -79,7 +79,42 @@ function initApp() {
     setupEventListeners();
     setupSliders();
     initEpisodeNavListeners();
+    
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('netflix_logged_in') === 'true';
+    if (isLoggedIn) {
+        showMainApp();
+    } else {
+        showLandingPage();
+    }
+}
+
+// Show/Hide page screens
+function showMainApp() {
+    const landingPage = document.getElementById('landingPage');
+    const mainHeader = document.getElementById('mainHeader');
+    const contentContainer = document.querySelector('.content-container');
+    const footer = document.querySelector('.footer');
+
+    if (landingPage) landingPage.style.display = 'none';
+    if (mainHeader) mainHeader.style.display = 'flex';
+    if (contentContainer) contentContainer.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+
+    // Load initial movies if not loaded
     loadHomeData();
+}
+
+function showLandingPage() {
+    const landingPage = document.getElementById('landingPage');
+    const mainHeader = document.getElementById('mainHeader');
+    const contentContainer = document.querySelector('.content-container');
+    const footer = document.querySelector('.footer');
+
+    if (landingPage) landingPage.style.display = 'block';
+    if (mainHeader) mainHeader.style.display = 'none';
+    if (contentContainer) contentContainer.style.display = 'none';
+    if (footer) footer.style.display = 'none';
 }
 
 function unlockAutoplay() {
@@ -409,6 +444,52 @@ function setupEventListeners() {
             }
         }
     });
+
+    // Landing Page Sign In (Bypass)
+    const landingSignInBtn = document.getElementById('landingSignInBtn');
+    if (landingSignInBtn) {
+        landingSignInBtn.addEventListener('click', () => {
+            localStorage.setItem('netflix_logged_in', 'true');
+            showMainApp();
+        });
+    }
+
+    const emailSignupForm = document.getElementById('emailSignupForm');
+    if (emailSignupForm) {
+        emailSignupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            localStorage.setItem('netflix_logged_in', 'true');
+            showMainApp();
+        });
+    }
+
+    // Landing FAQ Accordion dropdown toggle behavior
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(q => {
+        q.addEventListener('click', () => {
+            const item = q.parentElement;
+            const wasOpen = item.classList.contains('open');
+            
+            // Close all items first for single accordion behavior
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+            
+            if (!wasOpen) {
+                item.classList.add('open');
+            }
+        });
+    });
+
+    // Navbar Profile Click to Log Out
+    const userProfile = document.querySelector('.user-profile');
+    if (userProfile) {
+        userProfile.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm('Bạn có muốn đăng xuất khỏi Rần Phim?')) {
+                localStorage.removeItem('netflix_logged_in');
+                showLandingPage();
+            }
+        });
+    }
 }
 
 
@@ -569,6 +650,34 @@ async function showCardPreview(card) {
     if (infoOverlay) {
         infoOverlay.outerHTML = renderCardInfoOverlay(movie);
     }
+
+    // Add video preview if movie has a trailer
+    if (movie.trailer_url) {
+        const videoId = getYoutubeVideoId(movie.trailer_url);
+        if (videoId) {
+            // Check if container already exists
+            let videoContainer = card.querySelector('.card-video-container');
+            if (!videoContainer) {
+                videoContainer = document.createElement('div');
+                videoContainer.className = 'card-video-container';
+                // Insert before the hover-info overlay
+                const currentOverlay = card.querySelector('.movie-card-hover-info');
+                if (currentOverlay) {
+                    card.insertBefore(videoContainer, currentOverlay);
+                } else {
+                    card.appendChild(videoContainer);
+                }
+            }
+            videoContainer.innerHTML = `
+                <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1"
+                        title="Trailer preview"
+                        frameborder="0"
+                        allow="autoplay; encrypted-media"
+                        class="card-preview-iframe"></iframe>
+            `;
+            card.classList.add('has-video-preview');
+        }
+    }
 }
 
 function hideCardPreview(card) {
@@ -577,6 +686,13 @@ function hideCardPreview(card) {
     clearTimeout(card.previewTimer);
     card.previewTimer = null;
     card.classList.remove('preview-active');
+    card.classList.remove('has-video-preview');
+
+    // Remove video preview iframe
+    const videoContainer = card.querySelector('.card-video-container');
+    if (videoContainer) {
+        videoContainer.remove();
+    }
 
     if (activePreviewCard === card) {
         activePreviewCard = null;

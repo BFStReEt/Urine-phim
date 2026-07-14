@@ -1893,3 +1893,295 @@ body {
         right: 15px;
     }
 }
+
+/* ==========================================================================
+   Netflix Landing Page & FAQ Styles
+   ========================================================================== */
+.landing-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #000;
+    color: #fff;
+    font-family: var(--font-sans);
+    position: relative;
+    overflow-x: hidden;
+    z-index: 9999;
+}
+
+.landing-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 4%;
+    z-index: 10010;
+}
+
+.landing-header .logo {
+    color: var(--netflix-red);
+    font-family: 'Oswald', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-decoration: none;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.btn-signin {
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 4px;
+    background-color: var(--netflix-red);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-signin:hover {
+    background-color: var(--netflix-red-hover);
+}
+
+.landing-hero {
+    height: 100vh;
+    min-height: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding: 0 20px;
+    border-bottom: 8px solid #222;
+}
+
+.landing-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://assets.nflxext.com/ffe/siteui/vlv3/7c700b58-3164-4dbf-a384-81197a6f433b/de25a95f-3605-4e76-ae0e-7d6f51a221b2/VN-vi-20241014-tripleshot-perspective_alpha_website_large.jpg');
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.landing-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    background-image: linear-gradient(to top, rgba(0,0,0,0.85) 0, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.85) 100%);
+}
+
+.landing-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 950px;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.landing-hero-content h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    font-family: 'Outfit', sans-serif;
+    line-height: 1.15;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+.landing-hero-content .subtitle {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.email-signup-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.email-signup-form h3 {
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.4;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.8);
+}
+
+.email-input-group {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
+
+.email-input-group input {
+    flex: 1;
+    padding: 16px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(128, 128, 128, 0.7);
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    backdrop-filter: blur(4px);
+    transition: border-color 0.2s ease;
+}
+
+.email-input-group input:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 0 1px #fff;
+}
+
+.btn-large {
+    padding: 16px 30px;
+    font-size: 20px;
+    font-weight: 600;
+    border-radius: 4px;
+    background-color: var(--netflix-red);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.btn-large:hover {
+    background-color: var(--netflix-red-hover);
+    transform: scale(1.02);
+}
+
+/* Landing FAQ Section */
+.landing-faq {
+    padding: 70px 4% 90px;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.landing-faq h2 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    font-family: 'Outfit', sans-serif;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.faq-item {
+    background-color: #2D2D2D;
+    transition: background-color 0.25s ease;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.faq-item:hover {
+    background-color: #414141;
+}
+
+.faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.faq-question i {
+    font-size: 1.5rem;
+    transition: transform 0.25s ease;
+}
+
+.faq-item.open .faq-question i {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s cubic-bezier(0.5, 0, 0.1, 1), padding 0.25s ease;
+    padding: 0 24px;
+    border-top: 1px solid #141414;
+}
+
+.faq-item.open .faq-answer {
+    max-height: 400px;
+    padding: 24px;
+}
+
+.faq-answer p {
+    font-size: 1.15rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Hover Card Video Preview Styles
+   ========================================================================== */
+.card-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    background-color: #000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.movie-card.preview-active.has-video-preview .card-video-container {
+    opacity: 1;
+}
+
+.card-preview-iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.4); /* zoom in to crop youtube title/logo and black bars */
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .landing-hero-content h1 {
+        font-size: 2.2rem;
+    }
+    .landing-hero-content .subtitle {
+        font-size: 1.2rem;
+    }
+    .email-input-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .btn-large {
+        width: 100%;
+    }
+    .faq-question {
+        padding: 18px;
+        font-size: 1.1rem;
+    }
+}
+
