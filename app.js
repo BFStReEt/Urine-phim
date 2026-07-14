@@ -21,6 +21,7 @@ let heroPreviewMuted = localStorage.getItem('hero_preview_muted') !== 'false';
 let activePreviewCard = null;
 const movieDetailCache = new Map();
 let hasUnlockedAutoplay = false;
+let trailerObserver = null;
 
 function stripHtml(value) {
     return String(value || '').replace(/<[^>]*>?/gm, '').trim();
@@ -1202,6 +1203,51 @@ async function performSearch(keyword) {
 }
 
 // Open Movie Detail Modal
+// Setup intersection observer to autoplay modal trailer when scrolled into view
+function setupTrailerAutoplayObserver() {
+    const modal = document.getElementById('detailModal');
+    const iframe = document.getElementById('modalTrailerIframe');
+    const section = document.getElementById('modalTrailerSection');
+
+    if (!modal || !iframe || !section) return;
+
+    if (trailerObserver) {
+        trailerObserver.disconnect();
+    }
+
+    trailerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!iframe.src || iframe.src === 'about:blank') return;
+
+            if (entry.isIntersecting) {
+                // Autoplay and mute when scrolled into view
+                if (!iframe.src.includes('autoplay=1')) {
+                    const videoId = getYoutubeVideoId(iframe.src);
+                    if (videoId) {
+                        const embedUrl = getYoutubeEmbedUrl(iframe.src, { autoplay: 1, mute: 1 });
+                        if (embedUrl) iframe.src = embedUrl;
+                    }
+                }
+            } else {
+                // Pause/stop when scrolled out of view
+                if (iframe.src.includes('autoplay=1')) {
+                    const videoId = getYoutubeVideoId(iframe.src);
+                    if (videoId) {
+                        const embedUrl = getYoutubeEmbedUrl(iframe.src, { autoplay: 0, mute: 1 });
+                        if (embedUrl) iframe.src = embedUrl;
+                    }
+                }
+            }
+        });
+    }, {
+        root: modal,
+        threshold: 0.35 // trigger when 35% of the trailer block is visible in the scroll container
+    });
+
+    trailerObserver.observe(section);
+}
+
+// Open Movie Detail Modal
 async function openMovieDetail(slug, autoPlay = false) {
     stopHeroPreview();
     const modal = document.getElementById('detailModal');
@@ -1261,10 +1307,11 @@ async function openMovieDetail(slug, autoPlay = false) {
 
     // Load and show Trailer directly above episodes by default if present
     if (currentMovie.trailer_url) {
-        const embedUrl = getYoutubeEmbedUrl(currentMovie.trailer_url, 0); // autoplay = 0
+        const embedUrl = getYoutubeEmbedUrl(currentMovie.trailer_url, { autoplay: 0, mute: 1 });
         if (embedUrl) {
             document.getElementById('modalTrailerSection').style.display = 'block';
             document.getElementById('modalTrailerIframe').src = embedUrl;
+            setupTrailerAutoplayObserver();
         }
     }
 
@@ -1737,6 +1784,11 @@ function closeMovieDetail() {
     const trailerIframe = document.getElementById('modalTrailerIframe');
     if (trailerIframe) trailerIframe.src = '';
     document.getElementById('modalTrailerSection').style.display = 'none';
+
+    if (trailerObserver) {
+        trailerObserver.disconnect();
+        trailerObserver = null;
+    }
     
     closeFullscreenPlayer();
 

@@ -1290,6 +1290,7 @@ body {
 /* Settings Container bottom right */
 .fs-settings-container {
     position: relative;
+    margin-left: auto;
 }
 
 .fs-settings-menu {
@@ -1889,7 +1890,8 @@ body {
     }
 
     .fs-player-controls {
-        bottom: 15px;
+        bottom: 80px;
+        left: 15px;
         right: 15px;
     }
 }
