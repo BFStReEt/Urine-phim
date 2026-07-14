@@ -226,6 +226,7 @@ body {
 .hero {
     position: relative;
     height: 85vh;
+    min-height: 580px; /* Safe minimum height to prevent contents overlapping on low-height windows */
     display: flex;
     align-items: center;
     padding: 0 4%;
@@ -365,7 +366,7 @@ body {
 .hero-title {
     font-family: 'Oswald', sans-serif;
     font-weight: 600;
-    font-size: clamp(48px, 8vw, 84px);
+    font-size: clamp(36px, 6vw, 68px);
     letter-spacing: 1px;
     line-height: 1.08;
     text-transform: uppercase;
@@ -389,7 +390,7 @@ body {
     margin-bottom: 25px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
