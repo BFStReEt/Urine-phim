@@ -1851,12 +1851,118 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .navbar {
+        height: 60px;
+        padding: 0 12px;
+    }
+
+    .navbar .logo {
+        font-size: 24px;
+        letter-spacing: 1px;
+    }
+
     .nav-links {
-        display: none; /* Hide header links on smaller screens */
+        display: flex !important;
+        gap: 12px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-right: 10px;
     }
     
+    .nav-links::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-link {
+        font-size: 13px !important;
+    }
+
+    .nav-dropdown {
+        display: none; /* hide genre dropdown on mobile to save space */
+    }
+
+    .user-profile .avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* Hero Banner Mobile Optimization */
+    .hero {
+        height: auto;
+        min-height: 400px;
+        padding: 95px 16px 50px;
+        margin-bottom: 0;
+    }
+
+    .hero-content {
+        margin-top: 0;
+        max-width: 100%;
+    }
+
+    .hero-title {
+        font-size: clamp(24px, 7vw, 36px);
+        line-height: 1.15;
+    }
+
+    .hero-subtitle {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .hero-overview {
+        font-size: 13px;
+        margin-bottom: 15px;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+    }
+
+    .hero-buttons .btn {
+        padding: 8px 18px;
+        font-size: 14px;
+    }
+
     .movies-rows-container {
-        margin-top: -20px;
+        margin-top: 0; /* do not pull up to avoid overlapping with text */
+        padding: 0 10px;
+    }
+    
+    .movie-row {
+        margin-bottom: 25px;
+    }
+    
+    .row-title {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .slider-arrow {
+        display: none !important; /* hide slider arrows on mobile, swipe is natural */
+    }
+    
+    .movie-track {
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 10px;
+    }
+    
+    .movie-card {
+        flex: 0 0 130px; /* smaller card width on mobile */
+        scroll-snap-align: start;
+    }
+
+    .movie-card:hover {
+        transform: none; /* disable hover scale zoom on mobile touch screens */
+        box-shadow: none;
+    }
+
+    .movie-card-info {
+        padding: 8px;
+    }
+
+    .card-title {
+        font-size: 11px;
     }
     
     .modal-info-grid {
