@@ -1222,15 +1222,14 @@ body {
 /* Bottom Player Controls Overlay Panel */
 .fs-player-controls {
     position: absolute;
-    bottom: 6px;
-    left: 10px;
-    right: 10px;
+    bottom: 85px;
+    left: 30px;
+    right: 30px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     z-index: 20020;
     transition: opacity 0.4s ease;
-    pointer-events: none; /* let clicks pass through to native controls by default */
 }
 
 .fs-player-controls.hidden {
@@ -1238,20 +1237,15 @@ body {
     pointer-events: none;
 }
 
-/* Re-enable clicks on actual buttons inside the controls bar */
-.fs-player-controls > * {
-    pointer-events: auto;
-}
-
 /* Control buttons style in bottom right */
 .control-btn {
     background: none;
     border: none;
     color: #FFFFFF;
-    font-size: 18px;
+    font-size: 22px;
     cursor: pointer;
     text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-    opacity: 0.85;
+    opacity: 0.8;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -1269,17 +1263,16 @@ body {
     background: rgba(20, 20, 20, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: #FFFFFF;
-    padding: 4px 10px;
-    border-radius: 16px;
-    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    height: 26px;
+    gap: 8px;
     opacity: 0.9;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
     transition: var(--transition-smooth);
 }
 
@@ -1501,21 +1494,20 @@ body {
 
 /* Episode list button - pill style like Server button */
 .ep-list-btn {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.18);
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 16px;
+    padding: 6px 14px;
+    border-radius: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
-    backdrop-filter: blur(8px);
+    gap: 7px;
+    backdrop-filter: blur(6px);
     transition: all 0.2s ease;
     white-space: nowrap;
-    height: 26px;
 }
 
 .ep-list-btn:hover {
@@ -1525,19 +1517,18 @@ body {
 
 /* Prev / Next episode arrow buttons */
 .ep-nav-btn {
-    width: 26px;
-    height: 26px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.8);
-    font-size: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    backdrop-filter: blur(8px);
 }
 
 .ep-nav-btn:hover {
@@ -2006,9 +1997,9 @@ body {
     }
 
     .fs-player-controls {
-        bottom: 6px;
-        left: 8px;
-        right: 8px;
+        bottom: 80px;
+        left: 15px;
+        right: 15px;
     }
 }
 
