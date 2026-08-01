@@ -2266,8 +2266,68 @@ function loadVideoSource(embedUrl, m3u8Url) {
 
         // Initialize Hls.js Player with CORS proxy support & audio pitch stability config
         if (Hls.isSupported()) {
-            const proxiedM3u8Url = `/cors-proxy?url=${encodeURIComponent(m3u8Url)}`;
+            let isDirectFallbackAttempted = false;
 
+            const setupHlsEvents = (instance, isDirect) => {
+                instance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    fsHlsVideo.play().catch(e => console.log('HLS autoplay blocked by browser:', e));
+
+                    // Auto resume saved seek position
+                    if (pendingSeekTime !== null && pendingSeekTime > 5) {
+                        const seekTo = pendingSeekTime;
+                        pendingSeekTime = null;
+                        setTimeout(() => {
+                            if (fsHlsVideo.duration && seekTo < fsHlsVideo.duration) {
+                                fsHlsVideo.currentTime = seekTo;
+                                showResumeToast(seekTo);
+                            }
+                        }, 250);
+                    }
+                });
+
+                instance.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        console.warn(`HLS Error (isDirect: ${isDirect}):`, data.type, data.details);
+                        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            instance.recoverMediaError();
+                            return;
+                        }
+
+                        // Destroy broken instance
+                        if (hlsPlayerInstance) {
+                            hlsPlayerInstance.destroy();
+                            hlsPlayerInstance = null;
+                        }
+
+                        if (!isDirect && !isDirectFallbackAttempted) {
+                            isDirectFallbackAttempted = true;
+                            console.log('Proxy failed, attempting direct HLS URL load:', m3u8Url);
+                            hlsPlayerInstance = new Hls({
+                                maxMaxBufferLength: 30,
+                                maxBufferLength: 20,
+                                enableWorker: true,
+                                capLevelToPlayerSize: true,
+                                maxAudioFramesDrift: 0
+                            });
+                            fsHlsVideo.preservesPitch = false;
+                            fsHlsVideo.webkitPreservesPitch = false;
+                            hlsPlayerInstance.loadSource(m3u8Url);
+                            hlsPlayerInstance.attachMedia(fsHlsVideo);
+                            setupHlsEvents(hlsPlayerInstance, true);
+                        } else {
+                            // Direct load also failed or no proxy fallback remaining
+                            if (embedUrl) {
+                                console.log('HLS failed, auto switching to Server VIP (Embed)...');
+                                switchPlayerMode('embed');
+                            } else {
+                                fsError.style.display = 'flex';
+                            }
+                        }
+                    }
+                });
+            };
+
+            const proxiedM3u8Url = `/cors-proxy?url=${encodeURIComponent(m3u8Url)}`;
             hlsPlayerInstance = new Hls({
                 maxMaxBufferLength: 30,
                 maxBufferLength: 20,
@@ -2288,11 +2348,12 @@ function loadVideoSource(embedUrl, m3u8Url) {
             // Load via CORS proxy to bypass browser Same-Origin Policy & ISP blocking
             hlsPlayerInstance.loadSource(proxiedM3u8Url);
             hlsPlayerInstance.attachMedia(fsHlsVideo);
-
-            hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                fsHlsVideo.play().catch(e => console.log('HLS autoplay blocked by browser:', e));
-
-                // Auto resume saved seek position
+            setupHlsEvents(hlsPlayerInstance, false);
+        } else if (fsHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
+            // Safari / Native support
+            fsHlsVideo.src = m3u8Url;
+            fsHlsVideo.addEventListener('loadedmetadata', () => {
+                fsHlsVideo.play().catch(e => console.log('Native HLS autoplay blocked:', e));
                 if (pendingSeekTime !== null && pendingSeekTime > 5) {
                     const seekTo = pendingSeekTime;
                     pendingSeekTime = null;
@@ -2304,56 +2365,6 @@ function loadVideoSource(embedUrl, m3u8Url) {
                     }, 250);
                 }
             });
-
-            hlsPlayerInstance.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    console.warn('HLS Error event:', data.type, data.details);
-                    switch (data.type) {
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            console.warn('HLS Media Error - recovering media without restart...', data);
-                            if (hlsPlayerInstance) hlsPlayerInstance.recoverMediaError();
-                            break;
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            console.warn('HLS Network Error - restarting network load...', data);
-                            if (hlsPlayerInstance) hlsPlayerInstance.startLoad();
-                            break;
-                        default:
-                            console.error('Fatal HLS Error, falling back to direct load:', data);
-                            if (hlsPlayerInstance) {
-                                hlsPlayerInstance.destroy();
-                                hlsPlayerInstance = null;
-                            }
-                            // Fallback to direct load
-                            hlsPlayerInstance = new Hls({ maxMaxBufferLength: 30, maxAudioFramesDrift: 0, enableWorker: true });
-                            hlsPlayerInstance.loadSource(m3u8Url);
-                            hlsPlayerInstance.attachMedia(fsHlsVideo);
-                            hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                                fsHlsVideo.play().catch(e => console.log('Direct HLS autoplay blocked:', e));
-                            });
-                            hlsPlayerInstance.on(Hls.Events.ERROR, (e, d) => {
-                                if (d.fatal) {
-                                    console.error('Fatal HLS Direct Error:', d);
-                                    fsError.style.display = 'flex';
-                                    if (hlsPlayerInstance) hlsPlayerInstance.destroy();
-                                    hlsPlayerInstance = null;
-                                }
-                            });
-                            break;
-                    }
-                }
-            });
-        } else if (fsHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
-            // Safari / Native support
-            fsHlsVideo.src = `/cors-proxy?url=${encodeURIComponent(m3u8Url)}`;
-            fsHlsVideo.addEventListener('loadedmetadata', () => {
-                fsHlsVideo.play().catch(e => console.log('Native HLS autoplay blocked:', e));
-                if (pendingSeekTime !== null && pendingSeekTime > 5) {
-                    const seekTo = pendingSeekTime;
-                    pendingSeekTime = null;
-                    if (fsHlsVideo.duration && seekTo < fsHlsVideo.duration) {
-                        fsHlsVideo.currentTime = seekTo;
-                        showResumeToast(seekTo);
-                    }
                 }
             });
         } else {
