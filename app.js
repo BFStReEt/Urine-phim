@@ -1760,14 +1760,38 @@ function initEpisodeNavListeners() {
     // Rewind 10s button click
     if (rewind10Btn) {
         rewind10Btn.addEventListener('click', () => {
-            if (video) video.currentTime = Math.max(0, video.currentTime - 10);
+            if (currentPlayerMode === 'hls') {
+                if (video) video.currentTime = Math.max(0, video.currentTime - 10);
+            } else {
+                const fsEmbed = document.getElementById('fsEmbedPlayer');
+                if (fsEmbed && fsEmbed.contentWindow) {
+                    fsEmbed.focus();
+                    try {
+                        fsEmbed.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekBy', args: [-10] }), '*');
+                        fsEmbed.contentWindow.postMessage({ action: 'seek', value: -10 }, '*');
+                        fsEmbed.contentWindow.postMessage({ type: 'seek', seconds: -10 }, '*');
+                    } catch (e) {}
+                }
+            }
         });
     }
 
     // Forward 10s button click
     if (forward10Btn) {
         forward10Btn.addEventListener('click', () => {
-            if (video && video.duration) video.currentTime = Math.min(video.duration, video.currentTime + 10);
+            if (currentPlayerMode === 'hls') {
+                if (video && video.duration) video.currentTime = Math.min(video.duration, video.currentTime + 10);
+            } else {
+                const fsEmbed = document.getElementById('fsEmbedPlayer');
+                if (fsEmbed && fsEmbed.contentWindow) {
+                    fsEmbed.focus();
+                    try {
+                        fsEmbed.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekBy', args: [10] }), '*');
+                        fsEmbed.contentWindow.postMessage({ action: 'seek', value: 10 }, '*');
+                        fsEmbed.contentWindow.postMessage({ type: 'seek', seconds: 10 }, '*');
+                    } catch (e) {}
+                }
+            }
         });
     }
 
@@ -1905,8 +1929,8 @@ function loadVideoSource(embedUrl, m3u8Url) {
         // Custom player controls visibility for Embed mode
         document.getElementById('fsSeekbarBar').style.display = 'none';
         document.getElementById('fsPlayPauseBtn').style.display = 'none';
-        document.getElementById('fsRewind10Btn').style.display = 'none';
-        document.getElementById('fsForward10Btn').style.display = 'none';
+        document.getElementById('fsRewind10Btn').style.display = 'flex';
+        document.getElementById('fsForward10Btn').style.display = 'flex';
         document.getElementById('fsVolumeGroup').style.display = 'none';
     } else {
         fsEmbed.style.display = 'none';
