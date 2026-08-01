@@ -1344,37 +1344,32 @@ body {
 .control-btn {
     background: none;
     border: none;
-    color: #FFFFFF;
+    color: #E5E5E5;
     font-size: 20px;
     cursor: pointer;
     text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-    opacity: 0.85;
-    transition: all 0.2s ease;
+    opacity: 0.88;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 6px;
+    border-radius: 50%;
+}
+
+.control-btn svg {
+    display: block;
+    transition: transform 0.2s ease;
 }
 
 .control-btn:hover {
     opacity: 1;
-    color: var(--netflix-red);
-    transform: scale(1.15);
+    color: #FFFFFF;
+    transform: scale(1.14);
 }
 
-.control-step-btn {
-    position: relative;
-    font-size: 22px;
-}
-
-.control-step-btn .step-label {
-    font-size: 8px;
-    font-weight: 800;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -40%);
-    pointer-events: none;
+#fsPlayPauseBtn:hover svg {
+    fill: var(--netflix-red);
 }
 
 /* Volume Control */

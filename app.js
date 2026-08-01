@@ -1627,14 +1627,12 @@ function updatePlayPauseBtnState() {
     const video = document.getElementById('fsHlsVideoPlayer');
     const btn = document.getElementById('fsPlayPauseBtn');
     if (!btn || !video) return;
-    const icon = btn.querySelector('i');
-    if (!icon) return;
 
     if (video.paused || video.ended) {
-        icon.className = 'fas fa-play';
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
         btn.setAttribute('title', 'Phát (Space)');
     } else {
-        icon.className = 'fas fa-pause';
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
         btn.setAttribute('title', 'Tạm dừng (Space)');
     }
 }
@@ -1647,14 +1645,12 @@ function updateVolumeUI() {
 
     if (slider) slider.value = video.muted ? 0 : video.volume;
 
-    const icon = btn.querySelector('i');
-    if (!icon) return;
     if (video.muted || video.volume === 0) {
-        icon.className = 'fas fa-volume-mute';
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
     } else if (video.volume < 0.5) {
-        icon.className = 'fas fa-volume-down';
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
     } else {
-        icon.className = 'fas fa-volume-up';
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
     }
 }
 

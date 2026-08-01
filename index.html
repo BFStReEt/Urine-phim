@@ -494,25 +494,33 @@
                 <div class="fs-controls-left">
                     <!-- Play / Pause Button (HLS only) -->
                     <button class="control-btn" id="fsPlayPauseBtn" aria-label="Phát/Tạm dừng" title="Phát / Tạm dừng (Space)" style="display: none;">
-                        <i class="fas fa-pause"></i>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
 
-                    <!-- Rewind 10s Button (HLS only) -->
-                    <button class="control-btn control-step-btn" id="fsRewind10Btn" aria-label="Tua lùi 10 giây" title="Tua lùi 10s (Mũi tên trái)" style="display: none;">
-                        <i class="fas fa-undo-alt"></i>
-                        <span class="step-label">10s</span>
+                    <!-- Rewind 10s Button (HLS & Embed) -->
+                    <button class="control-btn" id="fsRewind10Btn" aria-label="Tua lùi 10 giây" title="Tua lùi 10s (Mũi tên trái)" style="display: none;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5V2L8 6l4 4V7a6 6 0 1 1-6 6"/>
+                            <text x="12" y="15.2" font-size="7" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none" font-family="sans-serif">10</text>
+                        </svg>
                     </button>
 
-                    <!-- Fast Forward 10s Button (HLS only) -->
-                    <button class="control-btn control-step-btn" id="fsForward10Btn" aria-label="Tua tới 10 giây" title="Tua tới 10s (Mũi tên phải)" style="display: none;">
-                        <i class="fas fa-redo-alt"></i>
-                        <span class="step-label">10s</span>
+                    <!-- Fast Forward 10s Button (HLS & Embed) -->
+                    <button class="control-btn" id="fsForward10Btn" aria-label="Tua tới 10 giây" title="Tua tới 10s (Mũi tên phải)" style="display: none;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5V2l4 4-4 4V7a6 6 0 1 0 6 6"/>
+                            <text x="12" y="15.2" font-size="7" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none" font-family="sans-serif">10</text>
+                        </svg>
                     </button>
 
                     <!-- Volume Control (HLS only) -->
                     <div class="fs-volume-group" id="fsVolumeGroup" style="display: none;">
                         <button class="control-btn" id="fsVolumeBtn" aria-label="Âm lượng" title="Tắt/Bật tiếng (M)">
-                            <i class="fas fa-volume-up"></i>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"/>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                            </svg>
                         </button>
                         <div class="fs-volume-slider-wrapper">
                             <input type="range" class="fs-volume-slider" id="fsVolumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Âm lượng">
