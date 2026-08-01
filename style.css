@@ -1337,7 +1337,7 @@ body {
 .fs-controls-left, .fs-controls-right {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 18px;
 }
 
 /* Control buttons style */
@@ -1345,15 +1345,15 @@ body {
     background: none;
     border: none;
     color: #E5E5E5;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
     text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-    opacity: 0.88;
+    opacity: 0.9;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px;
+    padding: 8px;
     border-radius: 50%;
 }
 
