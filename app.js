@@ -202,6 +202,82 @@ function getYoutubeEmbedUrl(url, options = 0) {
     return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
 }
 
+// --- Search History Manager ---
+function getSearchHistory() {
+    try {
+        return JSON.parse(localStorage.getItem('ranphim_search_history') || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveSearchQueryToHistory(query) {
+    if (!query || !query.trim()) return;
+    const cleanQuery = query.trim();
+    let history = getSearchHistory();
+    history = history.filter(item => item.toLowerCase() !== cleanQuery.toLowerCase());
+    history.unshift(cleanQuery);
+    if (history.length > 8) history = history.slice(0, 8);
+    localStorage.setItem('ranphim_search_history', JSON.stringify(history));
+    renderSearchHistoryDropdown();
+}
+
+function removeSearchHistoryItem(query) {
+    let history = getSearchHistory();
+    history = history.filter(item => item !== query);
+    localStorage.setItem('ranphim_search_history', JSON.stringify(history));
+    renderSearchHistoryDropdown();
+}
+
+function clearAllSearchHistory() {
+    localStorage.removeItem('ranphim_search_history');
+    renderSearchHistoryDropdown();
+}
+
+function renderSearchHistoryDropdown() {
+    const historyList = document.getElementById('searchHistoryList');
+    const dropdown = document.getElementById('searchHistoryDropdown');
+    if (!historyList || !dropdown) return;
+
+    const history = getSearchHistory();
+    if (history.length === 0) {
+        dropdown.classList.remove('open');
+        return;
+    }
+
+    historyList.innerHTML = '';
+    history.forEach(query => {
+        const item = document.createElement('div');
+        item.className = 'search-history-item';
+        item.innerHTML = `
+            <div class="history-text-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span class="history-query">${query}</span>
+            </div>
+            <button class="delete-history-btn" title="Xóa mốc này">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        `;
+
+        item.querySelector('.history-text-wrap').addEventListener('click', () => {
+            const input = document.getElementById('searchInput');
+            const searchBox = document.getElementById('searchBox');
+            input.value = query;
+            searchBox.classList.add('expanded', 'has-text');
+            document.getElementById('searchClear').style.display = 'block';
+            dropdown.classList.remove('open');
+            performSearch(query);
+        });
+
+        item.querySelector('.delete-history-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeSearchHistoryItem(query);
+        });
+
+        historyList.appendChild(item);
+    });
+}
+
 // Setup Event Listeners
 function setupEventListeners() {
     document.addEventListener('pointerdown', unlockAutoplay, { once: true });
@@ -262,11 +338,20 @@ function setupEventListeners() {
         switchTab('home', homeLink);
     });
 
-    // Search Toggle & Input
+    // Search Toggle, Input & History Dropdown
     const searchBox = document.getElementById('searchBox');
     const searchBtn = document.getElementById('searchBtn');
     const searchInput = document.getElementById('searchInput');
     const searchClear = document.getElementById('searchClear');
+    const searchHistoryDropdown = document.getElementById('searchHistoryDropdown');
+    const clearSearchHistoryBtn = document.getElementById('clearSearchHistoryBtn');
+
+    if (clearSearchHistoryBtn) {
+        clearSearchHistoryBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearAllSearchHistory();
+        });
+    }
 
     searchBtn.addEventListener('click', () => {
         searchBox.classList.add('expanded');
@@ -275,13 +360,35 @@ function setupEventListeners() {
 
     searchBox.addEventListener('click', () => {
         searchBox.classList.add('expanded');
-        searchInput.focus();
     });
 
-    // Close search box if clicked outside and empty
+    searchInput.addEventListener('focus', () => {
+        renderSearchHistoryDropdown();
+        if (getSearchHistory().length > 0) {
+            if (searchHistoryDropdown) searchHistoryDropdown.classList.add('open');
+        }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const query = searchInput.value.trim();
+            if (query) {
+                saveSearchQueryToHistory(query);
+                if (searchHistoryDropdown) searchHistoryDropdown.classList.remove('open');
+                performSearch(query);
+            }
+        }
+    });
+
+    // Close search box & history dropdown if clicked outside
     document.addEventListener('click', (e) => {
-        if (!searchBox.contains(e.target) && searchInput.value.trim() === '') {
-            searchBox.classList.remove('expanded');
+        if (!searchBox.contains(e.target)) {
+            if (searchInput.value.trim() === '') {
+                searchBox.classList.remove('expanded');
+            }
+            if (searchHistoryDropdown) {
+                searchHistoryDropdown.classList.remove('open');
+            }
         }
 
         if (!genreDropdownContainer.contains(e.target)) {
@@ -1223,6 +1330,9 @@ async function performSearch(keyword) {
         }
         return;
     }
+
+    // Save search query to history
+    saveSearchQueryToHistory(keyword);
 
     // Enter Search Mode UI
     stopHeroPreview();
