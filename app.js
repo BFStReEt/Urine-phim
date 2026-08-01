@@ -382,11 +382,10 @@ function setupEventListeners() {
 
     // Update fullscreen icon based on state
     document.addEventListener('fullscreenchange', () => {
-        const icon = fsFullscreenBtn.querySelector('i');
         if (document.fullscreenElement) {
-            icon.className = 'fas fa-compress';
+            fsFullscreenBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6m10-10h-6V4m0 16h6v-6M10 4H4v6"/></svg>`;
         } else {
-            icon.className = 'fas fa-expand';
+            fsFullscreenBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>`;
         }
     });
 
@@ -418,7 +417,6 @@ function setupEventListeners() {
     function toggleInAppMiniPlayer() {
         const fsPlayer = document.getElementById('fullscreenPlayer');
         const fsPipBtn = document.getElementById('fsPipBtn');
-        const icon = fsPipBtn ? fsPipBtn.querySelector('i') : null;
 
         fsPlayer.classList.toggle('mini-player');
         const isMini = fsPlayer.classList.contains('mini-player');
@@ -426,13 +424,17 @@ function setupEventListeners() {
         if (isMini) {
             // Unlock page scroll so user can freely browse website while video plays in corner!
             document.body.style.overflow = '';
-            if (icon) icon.className = 'fas fa-expand-alt';
-            fsPipBtn.setAttribute('title', 'Phóng to (Toàn màn hình)');
+            if (fsPipBtn) {
+                fsPipBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>`;
+                fsPipBtn.setAttribute('title', 'Phóng to (Toàn màn hình)');
+            }
         } else {
             // Lock page scroll for theater mode
             document.body.style.overflow = 'hidden';
-            if (icon) icon.className = 'fas fa-clone';
-            fsPipBtn.setAttribute('title', 'Thu nhỏ màn hình (Mini Player)');
+            if (fsPipBtn) {
+                fsPipBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+                fsPipBtn.setAttribute('title', 'Thu nhỏ màn hình (Mini Player)');
+            }
         }
     }
 
@@ -2089,8 +2091,8 @@ function closeFullscreenPlayer() {
     const fsPlayer = document.getElementById('fullscreenPlayer');
     fsPlayer.style.display = 'none';
     fsPlayer.classList.remove('mini-player');
-    const pipIcon = document.querySelector('#fsPipBtn i');
-    if (pipIcon) pipIcon.className = 'fas fa-clone';
+    const pipBtn = document.getElementById('fsPipBtn');
+    if (pipBtn) pipBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
     
     // Unlock page scroll if modal is closed, otherwise keep locked for modal view
     const modal = document.getElementById('detailModal');
