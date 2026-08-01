@@ -518,8 +518,11 @@
                             <input type="range" class="fs-volume-slider" id="fsVolumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Âm lượng">
                         </div>
                     </div>
+                </div>
 
-                    <!-- Episode nav: Episodes list button + Prev/Next arrows (left side of controls) -->
+                <!-- Right control group -->
+                <div class="fs-controls-right">
+                    <!-- Episode nav: Episodes list button + Prev/Next arrows (moved to right side) -->
                     <div class="fs-ep-nav" id="fsEpNav" style="display:none;">
                         <button class="ep-nav-btn" id="fsPrevEpBtn" aria-label="Tập trước" title="Tập trước (P)">
                             <i class="fas fa-step-backward"></i>
@@ -531,10 +534,7 @@
                             <i class="fas fa-step-forward"></i>
                         </button>
                     </div>
-                </div>
 
-                <!-- Right control group -->
-                <div class="fs-controls-right">
                     <!-- Settings cog dropdown menu container (using server pill layout) -->
                     <div class="fs-settings-container" id="fsSettingsContainer">
                         <button class="control-btn settings-pill" id="fsGearBtn" aria-label="Cài đặt">
@@ -554,7 +554,7 @@
                     </div>
 
                     <!-- Picture-in-Picture / Mini Player Button -->
-                    <button class="control-btn" id="fsPipBtn" aria-label="Thu nhỏ màn hình" title="Thu nhỏ màn hình (Mini Player / PiP)">
+                    <button class="control-btn" id="fsPipBtn" aria-label="Thu nhỏ màn hình" title="Thu nhỏ màn hình (Mini Player / PiP)" style="display: none;">
                         <i class="fas fa-clone"></i>
                     </button>
 

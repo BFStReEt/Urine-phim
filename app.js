@@ -1894,7 +1894,7 @@ function loadVideoSource(embedUrl, m3u8Url) {
         fsHlsWrapper.style.display = 'none';
         fsEmbed.src = embedUrl || '';
         fsPipBtn.style.display = 'none'; // Hidden in Embed mode as requested
-        fsFullscreenBtn.style.display = 'block'; // Fullscreen overlay button supported
+        fsFullscreenBtn.style.display = 'none'; // Hidden in Embed mode as requested
 
         // Controls mode layout for Embed mode (floats above iframe controls)
         if (fsPlayerControls) {
