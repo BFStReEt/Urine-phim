@@ -1514,6 +1514,41 @@ function showResumeToast(seekTime) {
     }, 4500);
 }
 
+function showCenterRipple(type) {
+    const container = document.querySelector('.fs-video-container');
+    if (!container) return;
+
+    let ripple = document.getElementById('fsCenterRipple');
+    if (!ripple) {
+        ripple = document.createElement('div');
+        ripple.id = 'fsCenterRipple';
+        ripple.className = 'center-play-ripple';
+        container.appendChild(ripple);
+    }
+
+    if (type === 'play') {
+        ripple.innerHTML = `<svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    } else {
+        ripple.innerHTML = `<svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    }
+
+    ripple.classList.remove('animate');
+    void ripple.offsetWidth;
+    ripple.classList.add('animate');
+}
+
+function togglePlayPause() {
+    const video = document.getElementById('fsHlsVideoPlayer');
+    if (!video) return;
+    if (video.paused) {
+        video.play().catch(e => console.log('Play error:', e));
+        showCenterRipple('play');
+    } else {
+        video.pause();
+        showCenterRipple('pause');
+    }
+}
+
 // Play Selected Episode in Fullscreen Theater Mode
 function playEpisode(serverIndex, episodeIndex, forcedSeekTime) {
     currentServerIndex = serverIndex;
@@ -1824,14 +1859,20 @@ function initEpisodeNavListeners() {
         });
     }
 
+    // Video container click (Click center of screen to Play/Pause)
+    const fsHlsWrapper = document.getElementById('fsHlsWrapper');
+    if (fsHlsWrapper) {
+        fsHlsWrapper.addEventListener('click', (e) => {
+            if (e.target.closest('.player-error') || e.target.closest('.next-ep-card')) return;
+            togglePlayPause();
+        });
+    }
+
     // Play/Pause button click
     if (playPauseBtn) {
-        playPauseBtn.addEventListener('click', () => {
-            if (video.paused) {
-                video.play();
-            } else {
-                video.pause();
-            }
+        playPauseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePlayPause();
         });
     }
 
@@ -1904,7 +1945,7 @@ function initEpisodeNavListeners() {
         if (currentPlayerMode === 'hls' && video) {
             if (key === ' ' || key === 'k') {
                 e.preventDefault();
-                video.paused ? video.play() : video.pause();
+                togglePlayPause();
                 showFsControls();
             } else if (key === 'arrowleft' || key === 'j') {
                 e.preventDefault();

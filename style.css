@@ -1417,6 +1417,51 @@ body {
     opacity: 0.85;
 }
 
+/* Center Play/Pause Ripple Animation */
+.fs-hls-wrapper {
+    cursor: pointer;
+}
+
+.center-play-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    width: 84px;
+    height: 84px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20025;
+    pointer-events: none;
+    opacity: 0;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.center-play-ripple.animate {
+    animation: centerRippleAnim 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes centerRippleAnim {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+}
+
 /* Volume Control */
 .fs-volume-group {
     display: flex;
