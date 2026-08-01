@@ -478,46 +478,92 @@
 
         <!-- Bottom right control panel bar (autohide on idle) -->
         <div class="fs-player-controls" id="fsPlayerControls">
-            <!-- Episode nav: Episodes list button + Prev/Next arrows (left side of controls) -->
-            <div class="fs-ep-nav" id="fsEpNav" style="display:none;">
-                <button class="ep-nav-btn" id="fsPrevEpBtn" aria-label="Tập trước" title="Tập trước">
-                    <i class="fas fa-step-backward"></i>
-                </button>
-                <button class="ep-list-btn" id="fsEpListBtn" aria-label="Danh sách tập">
-                    <i class="fas fa-list"></i> Tập
-                </button>
-                <button class="ep-nav-btn" id="fsNextEpBtn" aria-label="Tập tiếp theo" title="Tập tiếp theo">
-                    <i class="fas fa-step-forward"></i>
-                </button>
+            <!-- Progress / Seekbar bar (shows on HLS mode) -->
+            <div class="fs-seekbar-bar" id="fsSeekbarBar" style="display: none;">
+                <div class="fs-time-current" id="fsCurrentTime">00:00</div>
+                <div class="fs-seekbar-container" id="fsSeekbarContainer">
+                    <div class="fs-seekbar-buffer" id="fsSeekbarBuffer"></div>
+                    <div class="fs-seekbar-progress" id="fsSeekbarProgress"></div>
+                    <input type="range" class="fs-seekbar-input" id="fsSeekbarInput" min="0" max="100" value="0" step="0.1" aria-label="Thanh tiến trình phim">
+                </div>
+                <div class="fs-time-duration" id="fsDuration">00:00</div>
             </div>
 
-            <!-- Settings cog dropdown menu container (using server pill layout) -->
-            <div class="fs-settings-container" id="fsSettingsContainer">
-                <button class="control-btn settings-pill" id="fsGearBtn" aria-label="Cài đặt">
-                    <i class="fas fa-server"></i> Chọn Server
-                </button>
-                <div class="fs-settings-menu" id="fsSettingsMenu">
-                    <div class="settings-menu-panel" id="fsServerPanel">
-                        <div class="settings-menu-header">Chọn nguồn phát</div>
-                        <button class="settings-menu-item active" data-mode="embed" id="fsOptEmbed">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> Server VIP (Nhúng)
+            <div class="fs-controls-main">
+                <!-- Left control group -->
+                <div class="fs-controls-left">
+                    <!-- Play / Pause Button (HLS only) -->
+                    <button class="control-btn" id="fsPlayPauseBtn" aria-label="Phát/Tạm dừng" title="Phát / Tạm dừng (Space)" style="display: none;">
+                        <i class="fas fa-pause"></i>
+                    </button>
+
+                    <!-- Rewind 10s Button (HLS only) -->
+                    <button class="control-btn control-step-btn" id="fsRewind10Btn" aria-label="Tua lùi 10 giây" title="Tua lùi 10s (Mũi tên trái)" style="display: none;">
+                        <i class="fas fa-undo-alt"></i>
+                        <span class="step-label">10s</span>
+                    </button>
+
+                    <!-- Fast Forward 10s Button (HLS only) -->
+                    <button class="control-btn control-step-btn" id="fsForward10Btn" aria-label="Tua tới 10 giây" title="Tua tới 10s (Mũi tên phải)" style="display: none;">
+                        <i class="fas fa-redo-alt"></i>
+                        <span class="step-label">10s</span>
+                    </button>
+
+                    <!-- Volume Control (HLS only) -->
+                    <div class="fs-volume-group" id="fsVolumeGroup" style="display: none;">
+                        <button class="control-btn" id="fsVolumeBtn" aria-label="Âm lượng" title="Tắt/Bật tiếng (M)">
+                            <i class="fas fa-volume-up"></i>
                         </button>
-                        <button class="settings-menu-item" data-mode="hls" id="fsOptHls">
-                            <span class="check-icon"><i class="fas fa-check"></i></span> Server Sạch (HLS)
+                        <div class="fs-volume-slider-wrapper">
+                            <input type="range" class="fs-volume-slider" id="fsVolumeSlider" min="0" max="1" step="0.05" value="1" aria-label="Âm lượng">
+                        </div>
+                    </div>
+
+                    <!-- Episode nav: Episodes list button + Prev/Next arrows (left side of controls) -->
+                    <div class="fs-ep-nav" id="fsEpNav" style="display:none;">
+                        <button class="ep-nav-btn" id="fsPrevEpBtn" aria-label="Tập trước" title="Tập trước (P)">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button class="ep-list-btn" id="fsEpListBtn" aria-label="Danh sách tập">
+                            <i class="fas fa-list"></i> Tập
+                        </button>
+                        <button class="ep-nav-btn" id="fsNextEpBtn" aria-label="Tập tiếp theo" title="Tập tiếp theo (N)">
+                            <i class="fas fa-step-forward"></i>
                         </button>
                     </div>
                 </div>
+
+                <!-- Right control group -->
+                <div class="fs-controls-right">
+                    <!-- Settings cog dropdown menu container (using server pill layout) -->
+                    <div class="fs-settings-container" id="fsSettingsContainer">
+                        <button class="control-btn settings-pill" id="fsGearBtn" aria-label="Cài đặt">
+                            <i class="fas fa-server"></i> Chọn Server
+                        </button>
+                        <div class="fs-settings-menu" id="fsSettingsMenu">
+                            <div class="settings-menu-panel" id="fsServerPanel">
+                                <div class="settings-menu-header">Chọn nguồn phát</div>
+                                <button class="settings-menu-item active" data-mode="embed" id="fsOptEmbed">
+                                    <span class="check-icon"><i class="fas fa-check"></i></span> Server VIP (Nhúng)
+                                </button>
+                                <button class="settings-menu-item" data-mode="hls" id="fsOptHls">
+                                    <span class="check-icon"><i class="fas fa-check"></i></span> Server Sạch (HLS)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Picture-in-Picture / Mini Player Button -->
+                    <button class="control-btn" id="fsPipBtn" aria-label="Thu nhỏ màn hình" title="Thu nhỏ màn hình (Mini Player / PiP)">
+                        <i class="fas fa-clone"></i>
+                    </button>
+
+                    <!-- Native Fullscreen Toggle Button -->
+                    <button class="control-btn" id="fsFullscreenBtn" aria-label="Toàn màn hình" title="Toàn màn hình (F)">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
             </div>
-
-            <!-- Picture-in-Picture Button (HLS only) -->
-            <button class="control-btn" id="fsPipBtn" aria-label="Hình trong hình" style="display: none;">
-                <i class="fas fa-images"></i>
-            </button>
-
-            <!-- Native Fullscreen Toggle Button -->
-            <button class="control-btn" id="fsFullscreenBtn" aria-label="Toàn màn hình">
-                <i class="fas fa-expand"></i>
-            </button>
         </div>
 
         <!-- Episode List Panel (slide up from bottom, Netflix-style) -->

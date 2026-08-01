@@ -1222,40 +1222,284 @@ body {
 /* Bottom Player Controls Overlay Panel */
 .fs-player-controls {
     position: absolute;
-    bottom: 85px;
-    left: 30px;
-    right: 30px;
+    left: 0;
+    right: 0;
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    gap: 8px;
     z-index: 20020;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.4s ease, bottom 0.3s ease;
+}
+
+.fs-player-controls.mode-hls {
+    bottom: 0;
+    padding: 16px 30px 24px 30px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
+    pointer-events: auto;
+}
+
+.fs-player-controls.mode-embed {
+    bottom: 65px;
+    padding: 0 30px;
+    background: transparent;
+    pointer-events: none;
+}
+
+.fs-player-controls.mode-embed .fs-controls-left > *,
+.fs-player-controls.mode-embed .fs-controls-right > * {
+    pointer-events: auto;
 }
 
 .fs-player-controls.hidden {
     opacity: 0;
+    pointer-events: none !important;
+}
+
+/* Progress / Seekbar bar (HLS mode) */
+.fs-seekbar-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    user-select: none;
+    margin-bottom: 2px;
+}
+
+.fs-time-current, .fs-time-duration {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E5E5E5;
+    font-family: monospace, sans-serif;
+    min-width: 45px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.fs-seekbar-container {
+    position: relative;
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: height 0.15s ease;
+}
+
+.fs-seekbar-container:hover {
+    height: 10px;
+}
+
+.fs-seekbar-buffer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+    pointer-events: none;
+    transition: width 0.3s ease;
+}
+
+.fs-seekbar-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    background: var(--netflix-red);
+    border-radius: 3px;
     pointer-events: none;
 }
 
-/* Control buttons style in bottom right */
+.fs-seekbar-input {
+    position: absolute;
+    left: 0;
+    top: -6px;
+    width: 100%;
+    height: 20px;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    z-index: 5;
+}
+
+/* Controls Layout Row */
+.fs-controls-main {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.fs-controls-left, .fs-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Control buttons style */
 .control-btn {
     background: none;
     border: none;
     color: #FFFFFF;
-    font-size: 22px;
+    font-size: 20px;
     cursor: pointer;
     text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-    opacity: 0.8;
+    opacity: 0.85;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 6px;
 }
 
 .control-btn:hover {
     opacity: 1;
     color: var(--netflix-red);
     transform: scale(1.15);
+}
+
+.control-step-btn {
+    position: relative;
+    font-size: 22px;
+}
+
+.control-step-btn .step-label {
+    font-size: 8px;
+    font-weight: 800;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    pointer-events: none;
+}
+
+/* Volume Control */
+.fs-volume-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.fs-volume-slider-wrapper {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.25s ease;
+    display: flex;
+    align-items: center;
+}
+
+.fs-volume-group:hover .fs-volume-slider-wrapper,
+.fs-volume-slider-wrapper:focus-within {
+    width: 70px;
+}
+
+.fs-volume-slider {
+    width: 65px;
+    accent-color: var(--netflix-red);
+    cursor: pointer;
+    height: 4px;
+}
+
+/* Embed Mode Hint */
+.embed-mode-hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(20, 20, 20, 0.7);
+    padding: 5px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+}
+
+.embed-mode-hint i {
+    color: var(--netflix-red);
+}
+
+/* Floating Mini Player Mode (Shrink Player to Bottom-Right Corner) */
+.fullscreen-player.mini-player {
+    top: auto !important;
+    left: auto !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: 380px !important;
+    height: 214px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+    overflow: hidden !important;
+    z-index: 20050 !important;
+    animation: popInMini 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popInMini {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.fullscreen-player.mini-player .player-back-btn {
+    top: 8px !important;
+    left: 8px !important;
+    padding: 3px 8px !important;
+    font-size: 11px !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(5px);
+}
+
+.fullscreen-player.mini-player .player-back-btn span {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fullscreen-player.mini-player .fs-player-controls.mode-embed {
+    bottom: 8px !important;
+    padding: 0 10px !important;
+}
+
+.fullscreen-player.mini-player .fs-player-controls.mode-hls {
+    padding: 8px 12px 10px 12px !important;
+}
+
+.fullscreen-player.mini-player .embed-mode-hint {
+    display: none !important;
+}
+
+.fullscreen-player.mini-player .fs-seekbar-bar {
+    margin-bottom: 0 !important;
+}
+
+.fullscreen-player.mini-player .control-btn {
+    font-size: 15px !important;
+    padding: 3px !important;
+}
+
+.fullscreen-player.mini-player .settings-pill {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+}
+
+.fullscreen-player.mini-player .ep-list-btn {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+}
+
+.fullscreen-player.mini-player .ep-nav-btn {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
 }
 
 /* Custom settings button styling as a pill button instead of gear icon */

@@ -390,16 +390,51 @@ function setupEventListeners() {
         }
     });
 
-    // Picture in Picture Toggle
+    // Mini Player / Picture-in-Picture Toggle
     const fsPipBtn = document.getElementById('fsPipBtn');
-    fsPipBtn.addEventListener('click', () => {
-        const video = document.getElementById('fsHlsVideoPlayer');
-        if (document.pictureInPictureElement) {
-            document.exitPictureInPicture();
-        } else if (video && video.readyState >= 1) {
-            video.requestPictureInPicture().catch(e => console.error('PiP request failed:', e));
+    if (fsPipBtn) {
+        fsPipBtn.addEventListener('click', () => {
+            const video = document.getElementById('fsHlsVideoPlayer');
+
+            // If HLS mode and browser supports native PiP
+            if (currentPlayerMode === 'hls' && video && document.pictureInPictureEnabled && video.readyState >= 1) {
+                if (document.pictureInPictureElement) {
+                    document.exitPictureInPicture().catch(e => console.log(e));
+                    return;
+                } else {
+                    video.requestPictureInPicture().catch(e => {
+                        console.log('Native PiP blocked/failed, switching to floating mini player:', e);
+                        toggleInAppMiniPlayer();
+                    });
+                    return;
+                }
+            }
+
+            // Otherwise, toggle floating mini player card inside app
+            toggleInAppMiniPlayer();
+        });
+    }
+
+    function toggleInAppMiniPlayer() {
+        const fsPlayer = document.getElementById('fullscreenPlayer');
+        const fsPipBtn = document.getElementById('fsPipBtn');
+        const icon = fsPipBtn ? fsPipBtn.querySelector('i') : null;
+
+        fsPlayer.classList.toggle('mini-player');
+        const isMini = fsPlayer.classList.contains('mini-player');
+
+        if (isMini) {
+            // Unlock page scroll so user can freely browse website while video plays in corner!
+            document.body.style.overflow = '';
+            if (icon) icon.className = 'fas fa-expand-alt';
+            fsPipBtn.setAttribute('title', 'Phóng to (Toàn màn hình)');
+        } else {
+            // Lock page scroll for theater mode
+            document.body.style.overflow = 'hidden';
+            if (icon) icon.className = 'fas fa-clone';
+            fsPipBtn.setAttribute('title', 'Thu nhỏ màn hình (Mini Player)');
         }
-    });
+    }
 
     // Pagination
     document.getElementById('prevPageBtn').addEventListener('click', () => {
@@ -1537,6 +1572,93 @@ function closeEpPanel() {
 }
 
 // Wire up episode navigation event listeners (called once on DOM ready)
+// --- Custom HLS Player Controls & Keyboard Shortcuts ---
+let isUserSeeking = false;
+
+function formatTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) return '00:00';
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+
+    const pad = (num) => String(num).padStart(2, '0');
+    if (hrs > 0) {
+        return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+    }
+    return `${pad(mins)}:${pad(secs)}`;
+}
+
+function updatePlayerSeekbar() {
+    const video = document.getElementById('fsHlsVideoPlayer');
+    if (!video || !video.duration || video.duration === Infinity) return;
+
+    const currentTime = video.currentTime;
+    const duration = video.duration;
+    const percent = (currentTime / duration) * 100;
+
+    const seekbarInput = document.getElementById('fsSeekbarInput');
+    const seekbarProgress = document.getElementById('fsSeekbarProgress');
+    const currentTimeEl = document.getElementById('fsCurrentTime');
+    const durationEl = document.getElementById('fsDuration');
+
+    if (seekbarInput && !isUserSeeking) {
+        seekbarInput.value = percent;
+    }
+    if (seekbarProgress) {
+        seekbarProgress.style.width = `${percent}%`;
+    }
+    if (currentTimeEl) {
+        currentTimeEl.textContent = formatTime(currentTime);
+    }
+    if (durationEl) {
+        durationEl.textContent = formatTime(duration);
+    }
+
+    // Buffer progress
+    if (video.buffered && video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        const bufferPercent = (bufferedEnd / duration) * 100;
+        const seekbarBuffer = document.getElementById('fsSeekbarBuffer');
+        if (seekbarBuffer) seekbarBuffer.style.width = `${bufferPercent}%`;
+    }
+}
+
+function updatePlayPauseBtnState() {
+    const video = document.getElementById('fsHlsVideoPlayer');
+    const btn = document.getElementById('fsPlayPauseBtn');
+    if (!btn || !video) return;
+    const icon = btn.querySelector('i');
+    if (!icon) return;
+
+    if (video.paused || video.ended) {
+        icon.className = 'fas fa-play';
+        btn.setAttribute('title', 'Phát (Space)');
+    } else {
+        icon.className = 'fas fa-pause';
+        btn.setAttribute('title', 'Tạm dừng (Space)');
+    }
+}
+
+function updateVolumeUI() {
+    const video = document.getElementById('fsHlsVideoPlayer');
+    const btn = document.getElementById('fsVolumeBtn');
+    const slider = document.getElementById('fsVolumeSlider');
+    if (!video || !btn) return;
+
+    if (slider) slider.value = video.muted ? 0 : video.volume;
+
+    const icon = btn.querySelector('i');
+    if (!icon) return;
+    if (video.muted || video.volume === 0) {
+        icon.className = 'fas fa-volume-mute';
+    } else if (video.volume < 0.5) {
+        icon.className = 'fas fa-volume-down';
+    } else {
+        icon.className = 'fas fa-volume-up';
+    }
+}
+
+// Wire up episode navigation & custom player event listeners (called once on DOM ready)
 function initEpisodeNavListeners() {
     // Prev episode
     document.getElementById('fsPrevEpBtn').addEventListener('click', () => {
@@ -1570,9 +1692,20 @@ function initEpisodeNavListeners() {
     // Episode panel close X
     document.getElementById('fsEpPanelClose').addEventListener('click', closeEpPanel);
 
-    // HLS video timeupdate → show next-ep overlay in last 30s
-    document.getElementById('fsHlsVideoPlayer').addEventListener('timeupdate', () => {
-        const video = document.getElementById('fsHlsVideoPlayer');
+    // HLS Video Events & Controls
+    const video = document.getElementById('fsHlsVideoPlayer');
+    const seekbarInput = document.getElementById('fsSeekbarInput');
+    const playPauseBtn = document.getElementById('fsPlayPauseBtn');
+    const rewind10Btn = document.getElementById('fsRewind10Btn');
+    const forward10Btn = document.getElementById('fsForward10Btn');
+    const volumeBtn = document.getElementById('fsVolumeBtn');
+    const volumeSlider = document.getElementById('fsVolumeSlider');
+
+    // Time update & video progress
+    video.addEventListener('timeupdate', () => {
+        updatePlayerSeekbar();
+        updatePlayPauseBtnState();
+
         if (!video.duration || video.duration === Infinity) return;
         const server = currentMovie && currentMovie.episodes[currentServerIndex];
         if (!server) return;
@@ -1585,9 +1718,138 @@ function initEpisodeNavListeners() {
             overlay.style.display = 'none';
         }
     });
+
+    video.addEventListener('loadedmetadata', updatePlayerSeekbar);
+    video.addEventListener('progress', updatePlayerSeekbar);
+    video.addEventListener('play', updatePlayPauseBtnState);
+    video.addEventListener('pause', updatePlayPauseBtnState);
+    video.addEventListener('volumechange', updateVolumeUI);
+
+    // Seekbar input dragging/clicking
+    if (seekbarInput) {
+        seekbarInput.addEventListener('input', (e) => {
+            isUserSeeking = true;
+            if (video && video.duration) {
+                const seekToPercent = parseFloat(e.target.value);
+                const targetTime = (seekToPercent / 100) * video.duration;
+                document.getElementById('fsSeekbarProgress').style.width = `${seekToPercent}%`;
+                document.getElementById('fsCurrentTime').textContent = formatTime(targetTime);
+            }
+        });
+
+        seekbarInput.addEventListener('change', (e) => {
+            if (video && video.duration) {
+                const seekToPercent = parseFloat(e.target.value);
+                video.currentTime = (seekToPercent / 100) * video.duration;
+            }
+            isUserSeeking = false;
+        });
+    }
+
+    // Play/Pause button click
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+    }
+
+    // Rewind 10s button click
+    if (rewind10Btn) {
+        rewind10Btn.addEventListener('click', () => {
+            if (video) video.currentTime = Math.max(0, video.currentTime - 10);
+        });
+    }
+
+    // Forward 10s button click
+    if (forward10Btn) {
+        forward10Btn.addEventListener('click', () => {
+            if (video && video.duration) video.currentTime = Math.min(video.duration, video.currentTime + 10);
+        });
+    }
+
+    // Volume Mute toggle click
+    if (volumeBtn) {
+        volumeBtn.addEventListener('click', () => {
+            video.muted = !video.muted;
+            updateVolumeUI();
+        });
+    }
+
+    // Volume Slider input
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => {
+            video.volume = parseFloat(e.target.value);
+            video.muted = (video.volume === 0);
+            updateVolumeUI();
+        });
+    }
+
+    // Global Keyboard Shortcuts when player is open
+    document.addEventListener('keydown', (e) => {
+        const fsPlayer = document.getElementById('fullscreenPlayer');
+        if (!fsPlayer || fsPlayer.style.display !== 'flex') return;
+
+        // Don't trigger shortcuts if focus is in text inputs
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+
+        const key = e.key.toLowerCase();
+
+        // HLS controls
+        if (currentPlayerMode === 'hls' && video) {
+            if (key === ' ' || key === 'k') {
+                e.preventDefault();
+                video.paused ? video.play() : video.pause();
+                showFsControls();
+            } else if (key === 'arrowleft' || key === 'j') {
+                e.preventDefault();
+                video.currentTime = Math.max(0, video.currentTime - 10);
+                showFsControls();
+            } else if (key === 'arrowright' || key === 'l') {
+                e.preventDefault();
+                video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+                showFsControls();
+            } else if (key === 'm') {
+                e.preventDefault();
+                video.muted = !video.muted;
+                updateVolumeUI();
+                showFsControls();
+            } else if (key === 'arrowup') {
+                e.preventDefault();
+                video.volume = Math.min(1, video.volume + 0.1);
+                video.muted = false;
+                updateVolumeUI();
+                showFsControls();
+            } else if (key === 'arrowdown') {
+                e.preventDefault();
+                video.volume = Math.max(0, video.volume - 0.1);
+                updateVolumeUI();
+                showFsControls();
+            }
+        }
+
+        // Global shortcuts (both modes)
+        if (key === 'f') {
+            e.preventDefault();
+            document.getElementById('fsFullscreenBtn').click();
+            showFsControls();
+        } else if (key === 'n') {
+            e.preventDefault();
+            const server = currentMovie && currentMovie.episodes[currentServerIndex];
+            if (server && currentEpisodeIndex < server.server_data.length - 1) {
+                playEpisode(currentServerIndex, currentEpisodeIndex + 1);
+            }
+        } else if (key === 'p') {
+            e.preventDefault();
+            if (currentEpisodeIndex > 0) {
+                playEpisode(currentServerIndex, currentEpisodeIndex - 1);
+            }
+        }
+    });
 }
-
-
 
 // Load Video Stream Sources based on current mode
 function loadVideoSource(embedUrl, m3u8Url) {
@@ -1619,6 +1881,8 @@ function loadVideoSource(embedUrl, m3u8Url) {
         return;
     }
 
+    const fsPlayerControls = document.getElementById('fsPlayerControls');
+
     if (currentPlayerMode === 'embed') {
         if (!embedUrl && m3u8Url) {
             // Auto-fallback: switch to HLS mode if Embed link is missing but HLS is available
@@ -1629,13 +1893,39 @@ function loadVideoSource(embedUrl, m3u8Url) {
         fsEmbed.style.display = 'block';
         fsHlsWrapper.style.display = 'none';
         fsEmbed.src = embedUrl || '';
-        fsPipBtn.style.display = 'none'; // PiP not supported on iframe
-        fsFullscreenBtn.style.display = 'none'; // Fullscreen overlay button supported
+        fsPipBtn.style.display = 'block'; // Mini Player / Shrink button enabled on both servers
+        fsFullscreenBtn.style.display = 'block'; // Fullscreen overlay button supported
+
+        // Controls mode layout for Embed mode (floats above iframe controls)
+        if (fsPlayerControls) {
+            fsPlayerControls.classList.add('mode-embed');
+            fsPlayerControls.classList.remove('mode-hls');
+        }
+
+        // Custom player controls visibility for Embed mode
+        document.getElementById('fsSeekbarBar').style.display = 'none';
+        document.getElementById('fsPlayPauseBtn').style.display = 'none';
+        document.getElementById('fsRewind10Btn').style.display = 'none';
+        document.getElementById('fsForward10Btn').style.display = 'none';
+        document.getElementById('fsVolumeGroup').style.display = 'none';
     } else {
         fsEmbed.style.display = 'none';
         fsHlsWrapper.style.display = 'flex';
-        fsPipBtn.style.display = 'block'; // PiP supported on HLS video
+        fsPipBtn.style.display = 'block'; // Mini Player / Shrink button supported on HLS video
         fsFullscreenBtn.style.display = 'block'; // Fullscreen overlay button supported
+
+        // Controls mode layout for HLS mode
+        if (fsPlayerControls) {
+            fsPlayerControls.classList.add('mode-hls');
+            fsPlayerControls.classList.remove('mode-embed');
+        }
+
+        // Custom player controls visibility for HLS mode
+        document.getElementById('fsSeekbarBar').style.display = 'flex';
+        document.getElementById('fsPlayPauseBtn').style.display = 'flex';
+        document.getElementById('fsRewind10Btn').style.display = 'flex';
+        document.getElementById('fsForward10Btn').style.display = 'flex';
+        document.getElementById('fsVolumeGroup').style.display = 'flex';
         
         if (!m3u8Url) {
             if (embedUrl) {
@@ -1647,28 +1937,55 @@ function loadVideoSource(embedUrl, m3u8Url) {
             return;
         }
 
-        // Initialize Hls.js Player
+        // Initialize Hls.js Player with CORS proxy support
         if (Hls.isSupported()) {
+            const proxiedM3u8Url = `/cors-proxy?url=${encodeURIComponent(m3u8Url)}`;
+
             hlsPlayerInstance = new Hls({
                 maxMaxBufferLength: 30,
                 enableWorker: true
             });
-            hlsPlayerInstance.loadSource(m3u8Url);
+
+            // Load via CORS proxy to bypass browser Same-Origin Policy & ISP blocking
+            hlsPlayerInstance.loadSource(proxiedM3u8Url);
             hlsPlayerInstance.attachMedia(fsHlsVideo);
+
             hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                 fsHlsVideo.play().catch(e => console.log('HLS autoplay blocked by browser:', e));
             });
+
             hlsPlayerInstance.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
-                    console.error('Fatal HLS Error:', data);
-                    fsError.style.display = 'flex';
-                    hlsPlayerInstance.destroy();
-                    hlsPlayerInstance = null;
+                    console.warn('HLS Proxied Error, attempting direct URL fallback...', data);
+                    if (hlsPlayerInstance) {
+                        hlsPlayerInstance.destroy();
+                        hlsPlayerInstance = null;
+                    }
+
+                    // Fallback to direct load
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        hlsPlayerInstance = new Hls({ maxMaxBufferLength: 30, enableWorker: true });
+                        hlsPlayerInstance.loadSource(m3u8Url);
+                        hlsPlayerInstance.attachMedia(fsHlsVideo);
+                        hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                            fsHlsVideo.play().catch(e => console.log('Direct HLS autoplay blocked:', e));
+                        });
+                        hlsPlayerInstance.on(Hls.Events.ERROR, (e, d) => {
+                            if (d.fatal) {
+                                console.error('Fatal HLS Direct Error:', d);
+                                fsError.style.display = 'flex';
+                                if (hlsPlayerInstance) hlsPlayerInstance.destroy();
+                                hlsPlayerInstance = null;
+                            }
+                        });
+                    } else {
+                        fsError.style.display = 'flex';
+                    }
                 }
             });
         } else if (fsHlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
             // Safari / Native support
-            fsHlsVideo.src = m3u8Url;
+            fsHlsVideo.src = `/cors-proxy?url=${encodeURIComponent(m3u8Url)}`;
             fsHlsVideo.addEventListener('loadedmetadata', () => {
                 fsHlsVideo.play().catch(e => console.log('Native HLS autoplay blocked:', e));
             });
@@ -1751,6 +2068,9 @@ function stopVideoPlayer() {
 function closeFullscreenPlayer() {
     const fsPlayer = document.getElementById('fullscreenPlayer');
     fsPlayer.style.display = 'none';
+    fsPlayer.classList.remove('mini-player');
+    const pipIcon = document.querySelector('#fsPipBtn i');
+    if (pipIcon) pipIcon.className = 'fas fa-clone';
     
     // Unlock page scroll if modal is closed, otherwise keep locked for modal view
     const modal = document.getElementById('detailModal');
