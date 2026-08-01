@@ -2091,11 +2091,15 @@ function loadVideoSource(embedUrl, m3u8Url) {
                 lowLatencyMode: false,
                 capLevelToPlayerSize: true,
                 stretchShortVideoTrack: true,
-                maxBufferHole: 0.5
+                maxBufferHole: 0.1,
+                maxAudioFramesDrift: 0,
+                forceKeyFrameOnDiscontinuity: true,
+                highBufferWatchdogPeriod: 2
             });
 
             // Disable browser audio pitch distortion ("rè rè ồm ồm" audio bug fix)
             fsHlsVideo.preservesPitch = false;
+            fsHlsVideo.webkitPreservesPitch = false;
 
             // Load via CORS proxy to bypass browser Same-Origin Policy & ISP blocking
             hlsPlayerInstance.loadSource(proxiedM3u8Url);
@@ -2119,30 +2123,38 @@ function loadVideoSource(embedUrl, m3u8Url) {
 
             hlsPlayerInstance.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
-                    console.warn('HLS Proxied Error, attempting direct URL fallback...', data);
-                    if (hlsPlayerInstance) {
-                        hlsPlayerInstance.destroy();
-                        hlsPlayerInstance = null;
-                    }
-
-                    // Fallback to direct load
-                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                        hlsPlayerInstance = new Hls({ maxMaxBufferLength: 30, enableWorker: true });
-                        hlsPlayerInstance.loadSource(m3u8Url);
-                        hlsPlayerInstance.attachMedia(fsHlsVideo);
-                        hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                            fsHlsVideo.play().catch(e => console.log('Direct HLS autoplay blocked:', e));
-                        });
-                        hlsPlayerInstance.on(Hls.Events.ERROR, (e, d) => {
-                            if (d.fatal) {
-                                console.error('Fatal HLS Direct Error:', d);
-                                fsError.style.display = 'flex';
-                                if (hlsPlayerInstance) hlsPlayerInstance.destroy();
+                    console.warn('HLS Error event:', data.type, data.details);
+                    switch (data.type) {
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            console.warn('HLS Media Error - recovering media without restart...', data);
+                            if (hlsPlayerInstance) hlsPlayerInstance.recoverMediaError();
+                            break;
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            console.warn('HLS Network Error - restarting network load...', data);
+                            if (hlsPlayerInstance) hlsPlayerInstance.startLoad();
+                            break;
+                        default:
+                            console.error('Fatal HLS Error, falling back to direct load:', data);
+                            if (hlsPlayerInstance) {
+                                hlsPlayerInstance.destroy();
                                 hlsPlayerInstance = null;
                             }
-                        });
-                    } else {
-                        fsError.style.display = 'flex';
+                            // Fallback to direct load
+                            hlsPlayerInstance = new Hls({ maxMaxBufferLength: 30, maxAudioFramesDrift: 0, enableWorker: true });
+                            hlsPlayerInstance.loadSource(m3u8Url);
+                            hlsPlayerInstance.attachMedia(fsHlsVideo);
+                            hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                                fsHlsVideo.play().catch(e => console.log('Direct HLS autoplay blocked:', e));
+                            });
+                            hlsPlayerInstance.on(Hls.Events.ERROR, (e, d) => {
+                                if (d.fatal) {
+                                    console.error('Fatal HLS Direct Error:', d);
+                                    fsError.style.display = 'flex';
+                                    if (hlsPlayerInstance) hlsPlayerInstance.destroy();
+                                    hlsPlayerInstance = null;
+                                }
+                            });
+                            break;
                     }
                 }
             });
