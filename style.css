@@ -1372,6 +1372,51 @@ body {
     fill: var(--netflix-red);
 }
 
+/* Resume Watch Progress Toast */
+.fs-resume-toast {
+    position: absolute;
+    top: 70px;
+    left: 30px;
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: #FFFFFF;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 20030;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.fs-resume-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.fs-resume-toast button {
+    background: var(--netflix-red);
+    border: none;
+    color: #FFFFFF;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.fs-resume-toast button:hover {
+    opacity: 0.85;
+}
+
 /* Volume Control */
 .fs-volume-group {
     display: flex;

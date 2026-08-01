@@ -1355,7 +1355,7 @@ async function openMovieDetail(slug, autoPlay = false) {
     // Episodes & Servers Section
     setupEpisodesAndServers(autoPlay);
 
-    // Bind "Phát" button to play first episode
+    // Bind "Phát" or "Xem tiếp" button
     const playBtn = document.getElementById('modalPlayBtn');
     const newPlayBtn = playBtn.cloneNode(true);
     playBtn.parentNode.replaceChild(newPlayBtn, playBtn);
@@ -1366,11 +1366,18 @@ async function openMovieDetail(slug, autoPlay = false) {
         newPlayBtn.innerHTML = `<i class="fas fa-exclamation-circle"></i> Chưa có nguồn`;
     } else {
         newPlayBtn.disabled = false;
-        newPlayBtn.innerHTML = `<i class="fas fa-play"></i> Phát`;
-        
-        newPlayBtn.addEventListener('click', () => {
-            playEpisode(0, 0);
-        });
+        const saved = getSavedWatchProgress(currentMovie.slug);
+        if (saved && saved.episodeIndex !== undefined) {
+            newPlayBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;"><path d="M8 5v14l11-7z"/></svg> Xem tiếp (Tập ${saved.episodeIndex + 1})`;
+            newPlayBtn.addEventListener('click', () => {
+                playEpisode(saved.serverIndex || 0, saved.episodeIndex || 0, saved.currentTime);
+            });
+        } else {
+            newPlayBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;"><path d="M8 5v14l11-7z"/></svg> Phát`;
+            newPlayBtn.addEventListener('click', () => {
+                playEpisode(0, 0);
+            });
+        }
     }
 }
 
@@ -1455,8 +1462,60 @@ function renderEpisodesList(serverIndex) {
     });
 }
 
+// --- Watch Progress & Resume History ---
+function getSavedWatchProgress(movieSlug) {
+    try {
+        const progress = JSON.parse(localStorage.getItem('ranphim_progress') || '{}');
+        return progress[movieSlug] || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function saveWatchProgress(movieSlug, serverIndex, episodeIndex, currentTime) {
+    if (!movieSlug || isNaN(currentTime) || currentTime < 5) return;
+    try {
+        const progress = JSON.parse(localStorage.getItem('ranphim_progress') || '{}');
+        progress[movieSlug] = {
+            serverIndex,
+            episodeIndex,
+            currentTime: Math.floor(currentTime),
+            updatedAt: Date.now()
+        };
+        localStorage.setItem('ranphim_progress', JSON.stringify(progress));
+    } catch (e) {}
+}
+
+let pendingSeekTime = null;
+
+function showResumeToast(seekTime) {
+    let toast = document.getElementById('fsResumeToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'fsResumeToast';
+        toast.className = 'fs-resume-toast';
+        document.getElementById('fullscreenPlayer').appendChild(toast);
+    }
+
+    toast.innerHTML = `
+        <span>▶ Đã tiếp tục từ <strong>${formatTime(seekTime)}</strong></span>
+        <button id="fsRestartBtn">Xem từ đầu</button>
+    `;
+    toast.classList.add('show');
+
+    document.getElementById('fsRestartBtn').onclick = () => {
+        const video = document.getElementById('fsHlsVideoPlayer');
+        if (video) video.currentTime = 0;
+        toast.classList.remove('show');
+    };
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 4500);
+}
+
 // Play Selected Episode in Fullscreen Theater Mode
-function playEpisode(serverIndex, episodeIndex) {
+function playEpisode(serverIndex, episodeIndex, forcedSeekTime) {
     currentServerIndex = serverIndex;
     currentEpisodeIndex = episodeIndex;
 
@@ -1465,6 +1524,17 @@ function playEpisode(serverIndex, episodeIndex) {
     
     const ep = server.server_data[episodeIndex];
     if (!ep) return;
+
+    if (forcedSeekTime !== undefined && forcedSeekTime !== null) {
+        pendingSeekTime = forcedSeekTime;
+    } else if (currentMovie && currentMovie.slug) {
+        const saved = getSavedWatchProgress(currentMovie.slug);
+        if (saved && saved.serverIndex === serverIndex && saved.episodeIndex === episodeIndex && saved.currentTime > 5) {
+            pendingSeekTime = saved.currentTime;
+        } else {
+            pendingSeekTime = null;
+        }
+    }
 
     // Open Fullscreen Theater Player
     const fsPlayer = document.getElementById('fullscreenPlayer');
@@ -1594,9 +1664,19 @@ function updatePlayerSeekbar() {
     const video = document.getElementById('fsHlsVideoPlayer');
     if (!video || !video.duration || video.duration === Infinity) return;
 
+    // Prevent browser audio pitch-shifting distortion ("rè rè ồm ồm" audio bug fix)
+    if (video.preservesPitch !== false) {
+        video.preservesPitch = false;
+    }
+
     const currentTime = video.currentTime;
     const duration = video.duration;
     const percent = (currentTime / duration) * 100;
+
+    // Auto save watch progress periodically while watching
+    if (currentMovie && currentMovie.slug && currentTime > 5 && !video.paused) {
+        saveWatchProgress(currentMovie.slug, currentServerIndex, currentEpisodeIndex, currentTime);
+    }
 
     const seekbarInput = document.getElementById('fsSeekbarInput');
     const seekbarProgress = document.getElementById('fsSeekbarProgress');
@@ -1959,14 +2039,22 @@ function loadVideoSource(embedUrl, m3u8Url) {
             return;
         }
 
-        // Initialize Hls.js Player with CORS proxy support
+        // Initialize Hls.js Player with CORS proxy support & audio pitch stability config
         if (Hls.isSupported()) {
             const proxiedM3u8Url = `/cors-proxy?url=${encodeURIComponent(m3u8Url)}`;
 
             hlsPlayerInstance = new Hls({
                 maxMaxBufferLength: 30,
-                enableWorker: true
+                maxBufferLength: 20,
+                enableWorker: true,
+                lowLatencyMode: false,
+                capLevelToPlayerSize: true,
+                stretchShortVideoTrack: true,
+                maxBufferHole: 0.5
             });
+
+            // Disable browser audio pitch distortion ("rè rè ồm ồm" audio bug fix)
+            fsHlsVideo.preservesPitch = false;
 
             // Load via CORS proxy to bypass browser Same-Origin Policy & ISP blocking
             hlsPlayerInstance.loadSource(proxiedM3u8Url);
@@ -1974,6 +2062,18 @@ function loadVideoSource(embedUrl, m3u8Url) {
 
             hlsPlayerInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                 fsHlsVideo.play().catch(e => console.log('HLS autoplay blocked by browser:', e));
+
+                // Auto resume saved seek position
+                if (pendingSeekTime !== null && pendingSeekTime > 5) {
+                    const seekTo = pendingSeekTime;
+                    pendingSeekTime = null;
+                    setTimeout(() => {
+                        if (fsHlsVideo.duration && seekTo < fsHlsVideo.duration) {
+                            fsHlsVideo.currentTime = seekTo;
+                            showResumeToast(seekTo);
+                        }
+                    }, 250);
+                }
             });
 
             hlsPlayerInstance.on(Hls.Events.ERROR, (event, data) => {
@@ -2010,6 +2110,14 @@ function loadVideoSource(embedUrl, m3u8Url) {
             fsHlsVideo.src = `/cors-proxy?url=${encodeURIComponent(m3u8Url)}`;
             fsHlsVideo.addEventListener('loadedmetadata', () => {
                 fsHlsVideo.play().catch(e => console.log('Native HLS autoplay blocked:', e));
+                if (pendingSeekTime !== null && pendingSeekTime > 5) {
+                    const seekTo = pendingSeekTime;
+                    pendingSeekTime = null;
+                    if (fsHlsVideo.duration && seekTo < fsHlsVideo.duration) {
+                        fsHlsVideo.currentTime = seekTo;
+                        showResumeToast(seekTo);
+                    }
+                }
             });
         } else {
             fsError.style.display = 'flex';
@@ -2020,6 +2128,16 @@ function loadVideoSource(embedUrl, m3u8Url) {
 // Switch between Player Modes (embed vs HLS)
 function switchPlayerMode(mode) {
     if (currentPlayerMode === mode) return;
+
+    // Capture current playback timestamp before mode switch
+    const video = document.getElementById('fsHlsVideoPlayer');
+    let currentTimeToKeep = 0;
+    if (video && video.currentTime > 5) {
+        currentTimeToKeep = video.currentTime;
+    } else if (currentMovie) {
+        const saved = getSavedWatchProgress(currentMovie.slug);
+        if (saved) currentTimeToKeep = saved.currentTime;
+    }
 
     currentPlayerMode = mode;
     
@@ -2032,6 +2150,10 @@ function switchPlayerMode(mode) {
     
     const embedUrl = fsEmbed.getAttribute('data-src');
     const m3u8Url = fsHlsVideo.getAttribute('data-src');
+
+    if (currentTimeToKeep > 5) {
+        pendingSeekTime = currentTimeToKeep;
+    }
 
     loadVideoSource(embedUrl, m3u8Url);
 }
