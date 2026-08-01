@@ -2285,6 +2285,21 @@ function loadVideoSource(embedUrl, m3u8Url) {
                     }
                 });
 
+                // Auto re-align audio decoder when transitioning across ad discontinuities
+                instance.on(Hls.Events.FRAG_CHANGED, (event, data) => {
+                    if (data.frag && data.frag.discontinuity) {
+                        console.log('Ad segment discontinuity detected - auto syncing audio decoder');
+                        if (fsHlsVideo) {
+                            fsHlsVideo.preservesPitch = false;
+                            fsHlsVideo.webkitPreservesPitch = false;
+                            const cur = fsHlsVideo.currentTime;
+                            if (cur > 0 && !fsHlsVideo.paused) {
+                                fsHlsVideo.currentTime = cur + 0.001;
+                            }
+                        }
+                    }
+                });
+
                 instance.on(Hls.Events.ERROR, (event, data) => {
                     if (data.fatal) {
                         console.warn(`HLS Error (isDirect: ${isDirect}):`, data.type, data.details);
