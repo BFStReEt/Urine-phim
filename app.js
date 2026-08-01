@@ -104,6 +104,9 @@ function showMainApp() {
 
     // Load initial movies if not loaded
     loadHomeData();
+
+    // Check if there is an active movie watch session to restore on reload!
+    checkAndRestoreActiveWatchState();
 }
 
 function showLandingPage() {
@@ -1486,6 +1489,76 @@ function saveWatchProgress(movieSlug, serverIndex, episodeIndex, currentTime) {
     } catch (e) {}
 }
 
+// --- URL State & Active Watch Session Restoration ---
+function setWatchUrlState(slug, episodeIndex, serverIndex) {
+    if (slug) {
+        history.replaceState(null, '', `#watch?movie=${slug}&ep=${(episodeIndex || 0) + 1}&srv=${serverIndex || 0}`);
+    } else {
+        if (window.location.hash.startsWith('#watch')) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+    }
+}
+
+function saveLastActiveWatch(movieSlug, serverIndex, episodeIndex, currentTime) {
+    if (!movieSlug || isNaN(currentTime)) return;
+    try {
+        const activeState = {
+            slug: movieSlug,
+            serverIndex: serverIndex || 0,
+            episodeIndex: episodeIndex || 0,
+            currentTime: Math.floor(currentTime),
+            timestamp: Date.now()
+        };
+        localStorage.setItem('ranphim_last_active', JSON.stringify(activeState));
+        saveWatchProgress(movieSlug, serverIndex, episodeIndex, currentTime);
+    } catch (e) {}
+}
+
+function clearLastActiveWatch() {
+    try {
+        localStorage.removeItem('ranphim_last_active');
+    } catch (e) {}
+    setWatchUrlState(null);
+}
+
+async function checkAndRestoreActiveWatchState() {
+    const hash = window.location.hash;
+    let slugToRestore = null;
+    let epIndexToRestore = 0;
+    let srvIndexToRestore = 0;
+
+    if (hash.startsWith('#watch?')) {
+        const params = new URLSearchParams(hash.substring(7));
+        slugToRestore = params.get('movie');
+        const epNum = parseInt(params.get('ep'));
+        if (!isNaN(epNum) && epNum > 0) epIndexToRestore = epNum - 1;
+        const srvNum = parseInt(params.get('srv'));
+        if (!isNaN(srvNum)) srvIndexToRestore = srvNum;
+    }
+
+    if (!slugToRestore) {
+        try {
+            const lastActive = JSON.parse(localStorage.getItem('ranphim_last_active') || 'null');
+            if (lastActive && lastActive.slug && (Date.now() - lastActive.timestamp < 3 * 3600 * 1000)) {
+                slugToRestore = lastActive.slug;
+                epIndexToRestore = lastActive.episodeIndex || 0;
+                srvIndexToRestore = lastActive.serverIndex || 0;
+            }
+        } catch (e) {}
+    }
+
+    if (slugToRestore) {
+        console.log('Auto restoring active movie watch state:', slugToRestore, epIndexToRestore);
+        await openMovieDetail(slugToRestore, false);
+        if (currentMovie && currentMovie.episodes && currentMovie.episodes[srvIndexToRestore]) {
+            const saved = getSavedWatchProgress(slugToRestore);
+            const seekTime = (saved && saved.episodeIndex === epIndexToRestore) ? saved.currentTime : 0;
+            playEpisode(srvIndexToRestore, epIndexToRestore, seekTime);
+        }
+    }
+}
+
 let pendingSeekTime = null;
 
 function showResumeToast(seekTime) {
@@ -1586,6 +1659,7 @@ function playEpisode(serverIndex, episodeIndex, forcedSeekTime) {
     }
 
     document.getElementById('playerMovieTitle').textContent = `${currentMovie.name} - ${epTitle}`;
+    setWatchUrlState(currentMovie.slug, episodeIndex, serverIndex);
     fsPlayer.style.display = 'flex';
     document.body.style.overflow = 'hidden'; // Ensure body scroll lock
 
@@ -1710,7 +1784,7 @@ function updatePlayerSeekbar() {
 
     // Auto save watch progress periodically while watching
     if (currentMovie && currentMovie.slug && currentTime > 5 && !video.paused) {
-        saveWatchProgress(currentMovie.slug, currentServerIndex, currentEpisodeIndex, currentTime);
+        saveLastActiveWatch(currentMovie.slug, currentServerIndex, currentEpisodeIndex, currentTime);
     }
 
     const seekbarInput = document.getElementById('fsSeekbarInput');
@@ -2263,6 +2337,8 @@ function stopVideoPlayer() {
 
 // Close Fullscreen Player and return to Movie Detail Modal
 function closeFullscreenPlayer() {
+    clearLastActiveWatch();
+
     const fsPlayer = document.getElementById('fullscreenPlayer');
     fsPlayer.style.display = 'none';
     fsPlayer.classList.remove('mini-player');
