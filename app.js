@@ -1893,7 +1893,7 @@ function loadVideoSource(embedUrl, m3u8Url) {
         fsEmbed.style.display = 'block';
         fsHlsWrapper.style.display = 'none';
         fsEmbed.src = embedUrl || '';
-        fsPipBtn.style.display = 'block'; // Mini Player / Shrink button enabled on both servers
+        fsPipBtn.style.display = 'none'; // Hidden in Embed mode as requested
         fsFullscreenBtn.style.display = 'block'; // Fullscreen overlay button supported
 
         // Controls mode layout for Embed mode (floats above iframe controls)
