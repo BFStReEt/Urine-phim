@@ -2,6 +2,14 @@ import http from 'http';
 import https from 'https';
 import { URL } from 'url';
 
+function rewriteM3u8Playlist(content, baseUrl, proxyPath) {
+  return content.split(/\r?\n/).map((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) return line;
+    return `${proxyPath}?url=${encodeURIComponent(new URL(trimmed, baseUrl).toString())}`;
+  }).join('\n');
+}
+
 export default function handler(req, res) {
   try {
     const rawUrl = req.query.url;
@@ -36,12 +44,28 @@ export default function handler(req, res) {
         return;
       }
 
-      res.writeHead(proxyRes.statusCode, {
+      const responseHeaders = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS, HEAD',
         'Access-Control-Allow-Headers': '*',
         'Content-Type': proxyRes.headers['content-type'] || 'application/vnd.apple.mpegurl'
-      });
+      };
+
+      const contentType = proxyRes.headers['content-type'] || '';
+      const isPlaylist = contentType.includes('mpegurl') || parsedUrl.pathname.endsWith('.m3u8');
+
+      if (isPlaylist) {
+        const chunks = [];
+        proxyRes.on('data', (chunk) => chunks.push(chunk));
+        proxyRes.on('end', () => {
+          const playlist = Buffer.concat(chunks).toString('utf8');
+          res.writeHead(proxyRes.statusCode, responseHeaders);
+          res.end(rewriteM3u8Playlist(playlist, targetUrl, '/cors-proxy'));
+        });
+        return;
+      }
+
+      res.writeHead(proxyRes.statusCode, responseHeaders);
       proxyRes.pipe(res);
     });
 
