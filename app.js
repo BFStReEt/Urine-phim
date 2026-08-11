@@ -252,7 +252,7 @@ function renderSearchHistoryDropdown() {
         item.innerHTML = `
             <div class="history-text-wrap">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="history-query">${query}</span>
+                <span class="history-query">${escapeHtml(query)}</span>
             </div>
             <button class="delete-history-btn" title="Xóa mốc này">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -266,7 +266,7 @@ function renderSearchHistoryDropdown() {
             searchBox.classList.add('expanded', 'has-text');
             document.getElementById('searchClear').style.display = 'block';
             dropdown.classList.remove('open');
-            performSearch(query);
+            performSearch(query, { saveHistory: true });
         });
 
         item.querySelector('.delete-history-btn').addEventListener('click', (e) => {
@@ -373,9 +373,8 @@ function setupEventListeners() {
         if (e.key === 'Enter') {
             const query = searchInput.value.trim();
             if (query) {
-                saveSearchQueryToHistory(query);
                 if (searchHistoryDropdown) searchHistoryDropdown.classList.remove('open');
-                performSearch(query);
+                performSearch(query, { saveHistory: true });
             }
         }
     });
@@ -407,7 +406,7 @@ function setupEventListeners() {
         // Debounce search API calls
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            performSearch(value.trim());
+            performSearch(value.trim(), { saveHistory: true });
         }, 600);
     });
 
@@ -1315,7 +1314,7 @@ function renderGrid(movies, gridId, imgHelper, cdnPath) {
 }
 
 // Perform Search
-async function performSearch(keyword) {
+async function performSearch(keyword, options = {}) {
     searchKeyword = keyword;
     const homeContent = document.getElementById('homeContent');
     const categorySection = document.getElementById('categorySection');
@@ -1335,8 +1334,9 @@ async function performSearch(keyword) {
         return;
     }
 
-    // Save search query to history
-    saveSearchQueryToHistory(keyword);
+    if (options.saveHistory) {
+        saveSearchQueryToHistory(keyword);
+    }
 
     // Enter Search Mode UI
     stopHeroPreview();
@@ -2069,16 +2069,6 @@ function initEpisodeNavListeners() {
         rewind10Btn.addEventListener('click', () => {
             if (currentPlayerMode === 'hls') {
                 if (video) video.currentTime = Math.max(0, video.currentTime - 10);
-            } else {
-                const fsEmbed = document.getElementById('fsEmbedPlayer');
-                if (fsEmbed && fsEmbed.contentWindow) {
-                    fsEmbed.focus();
-                    try {
-                        fsEmbed.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekBy', args: [-10] }), '*');
-                        fsEmbed.contentWindow.postMessage({ action: 'seek', value: -10 }, '*');
-                        fsEmbed.contentWindow.postMessage({ type: 'seek', seconds: -10 }, '*');
-                    } catch (e) {}
-                }
             }
         });
     }
@@ -2088,16 +2078,6 @@ function initEpisodeNavListeners() {
         forward10Btn.addEventListener('click', () => {
             if (currentPlayerMode === 'hls') {
                 if (video && video.duration) video.currentTime = Math.min(video.duration, video.currentTime + 10);
-            } else {
-                const fsEmbed = document.getElementById('fsEmbedPlayer');
-                if (fsEmbed && fsEmbed.contentWindow) {
-                    fsEmbed.focus();
-                    try {
-                        fsEmbed.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekBy', args: [10] }), '*');
-                        fsEmbed.contentWindow.postMessage({ action: 'seek', value: 10 }, '*');
-                        fsEmbed.contentWindow.postMessage({ type: 'seek', seconds: 10 }, '*');
-                    } catch (e) {}
-                }
             }
         });
     }
@@ -2236,8 +2216,8 @@ function loadVideoSource(embedUrl, m3u8Url) {
         // Custom player controls visibility for Embed mode
         document.getElementById('fsSeekbarBar').style.display = 'none';
         document.getElementById('fsPlayPauseBtn').style.display = 'none';
-        document.getElementById('fsRewind10Btn').style.display = 'flex';
-        document.getElementById('fsForward10Btn').style.display = 'flex';
+        document.getElementById('fsRewind10Btn').style.display = 'none';
+        document.getElementById('fsForward10Btn').style.display = 'none';
         document.getElementById('fsVolumeGroup').style.display = 'none';
     } else {
         fsEmbed.style.display = 'none';
@@ -2334,13 +2314,7 @@ function loadVideoSource(embedUrl, m3u8Url) {
                             hlsPlayerInstance.attachMedia(fsHlsVideo);
                             setupHlsEvents(hlsPlayerInstance, true);
                         } else {
-                            // Direct load also failed or no proxy fallback remaining
-                            if (embedUrl) {
-                                console.log('HLS failed, auto switching to Server VIP (Embed)...');
-                                switchPlayerMode('embed');
-                            } else {
-                                fsError.style.display = 'flex';
-                            }
+                            fsError.style.display = 'flex';
                         }
                     }
                 });
