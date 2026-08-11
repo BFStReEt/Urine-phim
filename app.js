@@ -2380,8 +2380,6 @@ function loadVideoSource(embedUrl, m3u8Url) {
                     }, 250);
                 }
             });
-                }
-            });
         } else {
             fsError.style.display = 'flex';
         }
