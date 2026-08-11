@@ -966,6 +966,10 @@ async function fetchApi(url) {
     }
 }
 
+function hasValidApiData(res) {
+    return !!(res && (res.status === true || res.status === 'success') && res.data);
+}
+
 // Load Homepage Data (Newly updated, Single movies, Action, Series, Horror, Anime, SciFi, Costume, Comedy, Romance, Adventure, Crime)
 async function loadHomeData() {
     // Reset displayed slugs to prevent duplications across rows
@@ -1237,7 +1241,7 @@ async function loadCategoryPage(type, page) {
     }
 
     const res = await fetchApi(url);
-    if (res && res.status === 'success' && res.data) {
+    if (hasValidApiData(res)) {
         const data = res.data;
         const cdn = data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         
@@ -1344,7 +1348,7 @@ async function performSearch(keyword) {
     injectSkeletons('searchResultsGrid', 12);
 
     const res = await fetchApi(`${API_BASE}/v1/api/tim-kiem?keyword=${encodeURIComponent(keyword)}&limit=24`);
-    if (res && res.status === 'success' && res.data) {
+    if (hasValidApiData(res)) {
         const cdn = res.data.APP_DOMAIN_CDN_IMAGE + '/uploads/movies/';
         renderGrid(res.data.items, 'searchResultsGrid', getImageUrl, cdn);
     } else {
